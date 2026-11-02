@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>方行深港 · 订单管理</title>
+<meta name="theme-color" content="#f6f7f9" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --bg: #f6f7f9; --card: #fff; --ink: #131a24; --muted: #6f7c8f;
+    --line: #e7ebf1; --brand: #17406a; --brand-soft: #eef3f9;
+    --ok: #177a52; --ok-soft: #e9f6ef; --warn: #b45309; --warn-soft: #fdf2e4; --gold: #a97c32;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 10px 28px rgba(15,23,42,.06);
+  }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 16px 16px 40px; display: flex; flex-direction: column; gap: 14px; }
+  header.bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .logo {
+    width: 34px; height: 34px; position: relative; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px; background: linear-gradient(150deg, #265d90, #12324f);
+    border: 1px solid rgba(244,226,189,.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .brand-name { font-size: 15px; font-weight: 600; }
+  .brand-sub { font-size: 11px; color: var(--muted); letter-spacing: 1.4px; }
+  .btn { border: 1px solid var(--line); background: #fff; border-radius: 11px; height: 38px; padding: 0 14px; font-size: 13.5px; }
+  .btn.primary { background: linear-gradient(160deg, #1f4f80, #143a5e); color: #fff; border-color: transparent; }
+  .btn.small { height: 32px; padding: 0 10px; font-size: 12.5px; border-radius: 9px; white-space: nowrap; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
+  .muted { color: var(--muted); font-size: 12.5px; }
+  h2 { font-size: 15px; margin: 0 0 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .stat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .stat b { display: block; font-size: 22px; letter-spacing: .3px; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .field span { font-size: 12.5px; color: var(--muted); }
+  .field input, .field select { height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; font-size: 14px; outline: none; width: 100%; }
+  .field input:focus, .field select:focus { border-color: #b9cee6; box-shadow: 0 0 0 3px rgba(23,64,106,.06); }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12.5px; }
+  .chip.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .order { background: #fff; border: 1px solid var(--line); border-radius: 13px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(15,23,42,.03); }
+  .order-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .order-id { font-size: 12.5px; color: var(--gold); letter-spacing: .4px; }
+  .status { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: #f1f3f7; color: #6b7789; }
+  .status.paid { background: var(--warn-soft); color: var(--warn); }
+  .status.done { background: var(--ok-soft); color: var(--ok); }
+  .status.cancel { background: #f6f6f8; color: #9aa3b2; }
+  .order-main { margin-top: 6px; font-size: 14px; font-weight: 600; }
+  .order-sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .order-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .seats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .seat-row { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: #fff; }
+  .seat-row b { font-size: 13.5px; }
+  .seat-row .bar { height: 6px; border-radius: 3px; background: #eef1f6; margin-top: 8px; overflow: hidden; }
+  .seat-row .bar i { display: block; height: 100%; background: linear-gradient(90deg, #2f6ea5, #17406a); }
+  .seat-row .num { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .empty { color: var(--muted); font-size: 13px; padding: 10px 2px; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(8px); padding: 9px 16px; border-radius: 999px; background: rgba(19,26,36,.92); color: #fff; font-size: 12.5px; opacity: 0; pointer-events: none; transition: .22s; z-index: 50; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .setup { max-width: 520px; margin: 24px auto; }
+  .setup ol { margin: 8px 0 0; padding-left: 20px; font-size: 13px; color: #3d4757; line-height: 1.8; }
+  .setup code { background: #f3f5f9; padding: 1px 5px; border-radius: 5px; font-size: 12px; }
+  @media (max-width: 520px) {
+    .brand-name { font-size: 14px; }
+    .brand-sub { display: none; }
+    .stat b { font-size: 20px; }
+    .bar-actions { width: 100%; justify-content: flex-end; }
+  }
+.logo .fg { font-size: 14px; font-weight: 700; color: #f4e2bd; line-height: 1; }
+.logo .hk { position: absolute; right: 4px; bottom: 2px; font-size: 6px; color: rgba(244,226,189,.55); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><span class="fg">FG</span><span class="hk">HK</span></div>
+      <div>
+        <div class="brand-name">方行深港 · 订单管理</div>
+        <div class="brand-sub">FONGGO ADMIN</div>
+      </div>
+    </div>
+    <div class="bar-actions" style="display:flex;gap:8px">
+      <button class="btn small" id="refresh">刷新</button>
+      <button class="btn small" id="export">导出 CSV</button>
+      <a class="btn small" href="quote.html" style="text-decoration:none;display:inline-flex;align-items:center">报价器</a>
+      <a class="btn small" href="driver.html" style="text-decoration:none;display:inline-flex;align-items:center">司机端</a>
+      <button class="btn small" id="settings">设置</button>
+    </div>
+  </header>
+
+  <div id="app"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  var LS = 'fx_admin_cfg_v1';
+  var DEFAULTS = { url: 'https://vxeimjdghscgdagqqoxf.supabase.co', key: 'sb_publishable_EYXhroVlwheCv1YmxSx_Qg_41Mq5WGz', adminKey: '' };
+  var cfg = Object.assign({}, DEFAULTS, loadCfg());
+  var state = { orders: [], tab: 'all', date: '', loading: false, configured: !!(cfg.url && cfg.key && cfg.adminKey) };
+
+  function loadCfg() { try { return JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { return {}; } }
+  function saveCfg(c) { cfg = c; try { localStorage.setItem(LS, JSON.stringify(c)); } catch (e) {} }
+  function toast(t) { var el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, 1800); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+
+  function headers() {
+    var h = { apikey: cfg.key, 'x-admin-key': cfg.adminKey, 'Content-Type': 'application/json' };
+    // 新版 sb_publishable_ 钥匙不需要 Authorization；旧版 anon JWT 需要
+    if (!/^sb_publishable_/.test(cfg.key)) h.Authorization = 'Bearer ' + cfg.key;
+    return h;
+  }
+  function api(path, opts) {
+    return fetch(cfg.url.replace(/\/$/, '') + '/rest/v1/' + path, Object.assign({ headers: headers() }, opts || {}))
+      .then(function (r) { if (!r.ok) return r.text().then(function (t) { throw new Error(r.status + ' ' + t.slice(0, 120)); }); return r.status === 204 ? null : r.json(); });
+  }
+
+  function loadDispatch() {
+    return api('settings?key=eq.dispatch&select=value').then(function (rows) {
+      if (rows && rows[0] && rows[0].value && rows[0].value.priorityMinutes) {
+        state.dispatchMin = Number(rows[0].value.priorityMinutes);
+        render();
+      }
+    }).catch(function () {});
+  }
+
+  function load() {
+    if (!state.configured) return renderSetup();
+    state.loading = true; render();
+    api('orders?select=*&order=created_at.desc&limit=500')
+      .then(function (rows) { state.orders = rows || []; state.loading = false; render(); loadDispatch(); })
+      .catch(function (err) { state.loading = false; render(); toast('读取失败：' + err.message); });
+  }
+
+  function payload(o) { return o.payload || {}; }
+  function isBus(o) { return o.type === '通勤班车'; }
+  function orderTitle(o) {
+    var p = payload(o);
+    if (isBus(o)) return (p.direction || '') + ' · ' + (p.date || '') + ' · ' + (p.seat || '');
+    return (p.origin || '') + ' → ' + (p.destination || '');
+  }
+  function orderSub(o) {
+    var p = payload(o);
+    if (isBus(o)) return '乘车人 ' + (p.name || '') + ' · ' + (p.phone || '') + (p.dropoffAddr ? ' · 送达 ' + p.dropoff + ' ' + p.dropoffAddr : '');
+    return (p.when || '') + ' · ' + (p.pax || 1) + ' 人 · ' + (p.childseat ? '需儿童座椅' : '无需座椅') + ' · 行李 ' + (p.bags == null ? 1 : p.bags);
+  }
+  function statusClass(s) { return s === '已付款待核对' ? 'paid' : (s === '已确认' ? 'done' : (s === '已取消' ? 'cancel' : '')); }
+
+  function filtered() {
+    return state.orders.filter(function (o) {
+      if (state.tab === 'bus' && !isBus(o)) return false;
+      if (state.tab === 'charter' && isBus(o)) return false;
+      if (state.date) {
+        var d = isBus(o) ? payload(o).date : (payload(o).when || '').slice(0, 10);
+        if (d !== state.date) return false;
+      }
+      return true;
+    });
+  }
+
+  function seatStats() {
+    var map = {};
+    state.orders.forEach(function (o) {
+      if (!isBus(o)) return;
+      var p = payload(o);
+      if (o.status === '已取消') return;
+      var k = (p.date || '') + '|' + (p.direction || '');
+      if (!map[k]) map[k] = { date: p.date, dir: p.direction, used: 0 };
+      map[k].used += 1;
+    });
+    return Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return (a.date + a.dir).localeCompare(b.date + b.dir); });
+  }
+
+  function renderSetup() {
+    document.getElementById('app').innerHTML =
+      '<div class="card setup">' +
+      '<h2>第一次使用：填三项配置</h2>' +
+      '<div class="muted">按 <code>SETUP-订单同步.md</code> 在 Supabase 建表后，把下面三项填进来。只存在这台设备的浏览器里。</div>' +
+      '<div style="height:12px"></div>' +
+      '<label class="field"><span>Supabase 项目地址</span><input id="c-url" placeholder="https://xxxx.supabase.co" value="' + esc(cfg.url || '') + '"></label>' +
+      '<label class="field"><span>anon public key</span><input id="c-key" placeholder="eyJhbGciOi..." value="' + esc(cfg.key || '') + '"></label>' +
+      '<label class="field"><span>管理密钥（SQL 里设置的那串）</span><input id="c-admin" placeholder="fonggo-admin-2026" value="' + esc(cfg.adminKey || '') + '"></label>' +
+      '<button class="btn primary" id="save-cfg">保存并连接</button>' +
+      '<ol><li>打开 supabase.com 建一个免费项目</li><li>SQL Editor 里跑 SETUP 里的建表语句</li><li>把 URL、anon key、管理密钥填到上面</li></ol>' +
+      '</div>';
+    document.getElementById('save-cfg').onclick = function () {
+      var url = document.getElementById('c-url').value.trim();
+      var key = document.getElementById('c-key').value.trim();
+      var adminKey = document.getElementById('c-admin').value.trim();
+      if (!url || !key || !adminKey) return toast('三项都要填');
+      saveCfg({ url: url, key: key, adminKey: adminKey });
+      state.configured = true;
+      load();
+    };
+  }
+
+  function render() {
+    if (!state.configured) return renderSetup();
+    var list = filtered();
+    var paid = state.orders.filter(function (o) { return o.status === '已付款待核对'; }).length;
+    var today = new Date();
+    var todayKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    var todayOrders = state.orders.filter(function (o) {
+      var d = isBus(o) ? payload(o).date : (payload(o).when || '').slice(0, 10);
+      return d === todayKey;
+    }).length;
+    var revenue = state.orders.reduce(function (n, o) { return n + (Number(payload(o).price) || 0); }, 0);
+    var seats = seatStats();
+
+    var html = '' +
+      '<div class="card" style="margin-bottom:14px">' +
+      '  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">' +
+      '    <h2 style="margin:0">群发助手</h2>' +
+      '    <button class="btn primary small" id="makeBroadcast">生成今明余位播报</button>' +
+      '  </div>' +
+      '  <div class="muted" style="margin-top:6px">微信个人群没法自动进群回复，这条文案复制到群里即可；客户点链接自助下单，订单自动进系统。</div>' +
+      '  <textarea id="broadcastText" readonly style="width:100%;height:150px;margin-top:10px;border:1px solid #e7ebf1;border-radius:10px;padding:10px;font-size:12.5px;line-height:1.7;resize:vertical;display:none"></textarea>' +
+      '  <div style="display:none;gap:8px;margin-top:8px" id="broadcastActions"><button class="btn small" id="copyBroadcast">复制文案</button></div>' +
+      '</div>' +
+      '<div class="card" style="margin-bottom:14px">' +
+      '  <h2 style="margin:0 0 6px">即时派单设置</h2>' +
+      '  <div class="muted">车主自己的车在这个时间内能到，就优先派给他；超过就发到司机抢单池。</div>' +
+      '  <div style="display:flex;gap:10px;align-items:flex-end;margin-top:10px;flex-wrap:wrap">' +
+      '    <label class="field" style="margin:0"><span>车主优先（分钟）</span><input id="dispatchMin" type="number" min="5" max="180" value="' + (state.dispatchMin || 30) + '" style="width:120px"></label>' +
+      '    <button class="btn primary small" id="saveDispatch">保存</button>' +
+      '    <span class="muted" style="font-size:12px">当前：' + (state.dispatchMin || 30) + ' 分钟</span>' +
+      '  </div>' +
+      '</div>' +
+      '<div class="grid">' +
+      '  <div class="stat"><b>' + state.orders.length + '</b><span>累计订单</span></div>' +
+      '  <div class="stat"><b>' + todayOrders + '</b><span>今日行程</span></div>' +
+      '  <div class="stat"><b>' + paid + '</b><span>待核对付款</span></div>' +
+      '  <div class="stat"><b>¥' + revenue + '</b><span>订单金额合计</span></div>' +
+      '</div>' +
+
+      '<div class="card">' +
+      '  <h2>余位（按日期 · 方向）</h2>' +
+      (seats.length ? '<div class="seats">' + seats.map(function (s) {
+        var left = Math.max(0, 5 - s.used);
+        return '<div class="seat-row"><b>' + esc(s.date) + ' · ' + esc(s.dir) + '</b>' +
+          '<div class="bar"><i style="width:' + Math.round((s.used / 5) * 100) + '%"></i></div>' +
+          '<div class="num">已订 ' + s.used + ' / 5 · 余 ' + left + ' 座</div></div>';
+      }).join('') + '</div>' : '<div class="empty">还没有班车订单</div>') +
+      '  <div class="muted" style="margin-top:10px">余位按「已提交且未取消」的订单数计算，每车 5 座。</div>' +
+      '</div>' +
+
+      '<div class="card">' +
+      '  <div class="filters">' +
+      '    <button class="chip ' + (state.tab === 'all' ? 'on' : '') + '" data-tab="all">全部</button>' +
+      '    <button class="chip ' + (state.tab === 'bus' ? 'on' : '') + '" data-tab="bus">通勤班车</button>' +
+      '    <button class="chip ' + (state.tab === 'charter' ? 'on' : '') + '" data-tab="charter">跨境包车</button>' +
+      '    <input type="date" id="f-date" value="' + esc(state.date) + '" style="height:34px;border:1px solid #e7ebf1;border-radius:9px;padding:0 10px;font-size:12.5px">' +
+      '    <button class="chip" id="clear-date">清空日期</button>' +
+      '    <span class="muted">' + (state.loading ? '加载中…' : ('共 ' + list.length + ' 条')) + '</span>' +
+      '  </div>' +
+      '</div>' +
+
+      '<div class="list">' + (list.length ? list.map(function (o) {
+        var p = payload(o);
+        return '<div class="order">' +
+          '<div class="order-head"><span class="order-id">' + esc(o.id) + '</span><span class="status ' + statusClass(o.status) + '">' + esc(o.status || '') + '</span></div>' +
+          '<div class="order-main">' + esc(orderTitle(o)) + '</div>' +
+          '<div class="order-sub">' + esc(orderSub(o)) + '</div>' +
+          '<div class="order-sub">' + (o.type || '') + ' · ' + (p.price == null ? '待报价' : '¥' + p.price) + ' · ' + esc((o.created_at || '').replace('T', ' ').slice(0, 16)) + '</div>' +
+          '<div class="order-actions">' +
+          '<button class="btn small" data-act="paid" data-id="' + esc(o.id) + '">标记已付款</button>' +
+          '<button class="btn small" data-act="done" data-id="' + esc(o.id) + '">确认占位</button>' +
+          '<button class="btn small" data-act="cancel" data-id="' + esc(o.id) + '">取消</button>' +
+          '</div></div>';
+      }).join('') : '<div class="empty">没有符合条件的订单</div>') + '</div>';
+
+    document.getElementById('app').innerHTML = html;
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-tab]');
+    if (t) { state.tab = t.dataset.tab; render(); return; }
+    if (e.target.id === 'clear-date') { state.date = ''; render(); return; }
+    var a = e.target.closest('[data-act]');
+    if (!a) return;
+    var map = { paid: '已付款待核对', done: '已确认', cancel: '已取消' };
+    var status = map[a.dataset.act];
+    api('orders?id=eq.' + encodeURIComponent(a.dataset.id), { method: 'PATCH', body: JSON.stringify({ status: status }) })
+      .then(function () { toast('已更新为「' + status + '」'); load(); })
+      .catch(function (err) { toast('更新失败：' + err.message); });
+  });
+
+  document.addEventListener('change', function (e) {
+    if (e.target.id === 'f-date') { state.date = e.target.value; render(); }
+  });
+
+  document.getElementById('refresh').onclick = load;
+  document.getElementById('settings').onclick = function () { state.configured = !!(cfg.url && cfg.key && cfg.adminKey); renderSetup(); };
+  document.getElementById('export').onclick = function () {
+    var rows = [['预约号', '业务', '内容', '乘车人/时间', '金额', '状态', '创建时间']];
+    filtered().forEach(function (o) {
+      var p = payload(o);
+      rows.push([o.id, o.type || '', orderTitle(o), isBus(o) ? (p.name || '') + ' ' + (p.phone || '') : (p.when || ''), p.price == null ? '' : p.price, o.status || '', (o.created_at || '').slice(0, 19)]);
+    });
+    var csv = rows.map(function (r) { return r.map(function (c) { return '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+    var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'fonggo-orders-' + Date.now() + '.csv';
+    link.click();
+  };
+
+  function broadcastText() {
+    var BOOK_URL = 'https://haozefangaaron-oss.github.io/fangxing-sg/';
+    var WD = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    var days = [];
+    var base = new Date();
+    for (var i = 0; i < 10 && days.length < 2; i++) {
+      var d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+      if (d.getDay() === 0 || d.getDay() === 6) continue;
+      days.push(d);
+    }
+    function key(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function used(k, dir) {
+      return state.orders.filter(function (o) {
+        if (o.type !== '通勤班车' || o.status === '已取消') return false;
+        var p = payload(o);
+        return p.date === k && p.direction === dir;
+      }).length;
+    }
+    var lines = ['【方行深港 · 余位播报】'];
+    days.forEach(function (d) {
+      var k = key(d);
+      var a = Math.max(0, 5 - used(k, '去程'));
+      var b = Math.max(0, 5 - used(k, '返程'));
+      lines.push('');
+      lines.push((d.getMonth() + 1) + '/' + d.getDate() + ' ' + WD[d.getDay()]);
+      lines.push('去程 7:50 福田站12号出口 → IFC二期：' + (a > 0 ? '余 ' + a + ' 座' : '已满'));
+      lines.push('返程 18:40 IFC二期 → 皇岗/家门口：' + (b > 0 ? '余 ' + b + ' 座' : '已满'));
+    });
+    lines.push('');
+    lines.push('预约 👉 ' + BOOK_URL);
+    lines.push('（付完截图发我核对，座位以确认后为准）');
+    return lines.join('\n');
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.id === 'makeBroadcast') {
+      var t = broadcastText();
+      var ta = document.getElementById('broadcastText');
+      ta.value = t;
+      ta.style.display = 'block';
+      document.getElementById('broadcastActions').style.display = 'flex';
+      toast('已生成，点「复制文案」发群里');
+    }
+    if (e.target.id === 'saveDispatch') {
+      var n = Number(document.getElementById('dispatchMin').value);
+      if (!n || n < 5 || n > 180) return toast('填 5-180 分钟');
+      var body = JSON.stringify({ key: 'dispatch', value: { priorityMinutes: n } });
+      api('settings?key=eq.dispatch', { method: 'PATCH', headers: Object.assign(headers(), { Prefer: 'return=minimal' }), body: JSON.stringify({ value: { priorityMinutes: n } }) })
+        .then(function () { return api('settings?key=eq.dispatch&select=key'); })
+        .then(function (rows) {
+          if (!rows || !rows.length) return api('settings', { method: 'POST', headers: Object.assign(headers(), { Prefer: 'return=minimal' }), body: body });
+        })
+        .then(function () { state.dispatchMin = n; render(); toast('已保存：车主优先 ' + n + ' 分钟'); })
+        .catch(function (err) { toast('保存失败：' + err.message); });
+      return;
+    }
+    if (e.target.id === 'copyBroadcast') {
+      var ta2 = document.getElementById('broadcastText');
+      ta2.select();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ta2.value).then(function () { toast('已复制，去群里粘贴'); });
+      } else {
+        document.execCommand('copy');
+        toast('已复制，去群里粘贴');
+      }
+    }
+  });
+
+  if (state.configured) load(); else renderSetup();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>方行深港 · 包车报价器</title>
+<meta name="theme-color" content="#f6f7f9" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --bg:#f6f7f9; --card:#fff; --ink:#131a24; --muted:#6f7c8f; --line:#e7ebf1;
+    --brand:#17406a; --brand-soft:#eef3f9; --gold:#a97c32; --gold-soft:#fbf4e6;
+    --ok:#177a52; --ok-soft:#e9f6ef; --warn:#b45309; --warn-soft:#fdf2e4; --radius:16px;
+    --shadow:0 1px 2px rgba(15,23,42,.04), 0 10px 28px rgba(15,23,42,.06);
+  }
+  html, body { margin:0; min-height:100%; }
+  body { background:var(--bg); color:var(--ink); font:15px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; -webkit-font-smoothing:antialiased; }
+  button, input, select { font:inherit; color:inherit; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 16px 16px 48px; }
+  header.bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0 14px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .logo {
+    width: 34px; height: 34px; position: relative; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px; background: linear-gradient(150deg, #265d90, #12324f);
+    border: 1px solid rgba(244,226,189,.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .brand-name { font-size:15px; font-weight:600; }
+  .brand-sub { font-size:11px; color:var(--muted); letter-spacing:1.6px; }
+  .btn { border:1px solid var(--line); background:#fff; border-radius:11px; height:40px; padding:0 14px; font-size:13.5px; cursor:pointer; }
+  .btn.primary { background:linear-gradient(160deg,#1f4f80,#143a5e); color:#fff; border-color:transparent; }
+  .btn.gold { background:linear-gradient(160deg,#c39a58,#a97c32); color:#fff; border-color:transparent; }
+  .btn.small { height:32px; padding:0 10px; font-size:12.5px; border-radius:9px; }
+  .btn.block { width:100%; height:48px; font-size:15px; }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px; align-items:start; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); }
+  h2 { font-size:15px; margin:0 0 12px; }
+  .field { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  .field label { font-size:12.5px; color:var(--muted); }
+  .field input, .field select { height:42px; border:1px solid var(--line); border-radius:10px; padding:0 12px; background:#fff; outline:none; width:100%; }
+  .field input:focus, .field select:focus { border-color:#b9cee6; box-shadow:0 0 0 3px rgba(23,64,106,.06); }
+  .field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stepper { display:flex; align-items:center; justify-content:space-between; border:1px solid var(--line); border-radius:10px; padding:6px 10px; height:42px; }
+  .stepper button { width:26px; height:26px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; line-height:1; }
+  .stepper span { min-width:20px; text-align:center; font-weight:600; }
+  .switch { display:flex; align-items:center; gap:8px; font-size:13.5px; }
+  .switch input { width:18px; height:18px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 12px; font-size:12.5px; cursor:pointer; }
+  .chip.on { border-color:var(--brand); background:var(--brand-soft); color:var(--brand); font-weight:600; }
+  .muted { color:var(--muted); font-size:12.5px; }
+  .quote-lines { display:flex; flex-direction:column; gap:8px; }
+  .qline { display:flex; justify-content:space-between; gap:12px; font-size:14px; padding:6px 0; border-bottom:1px dashed var(--line); }
+  .qline.total { border-bottom:0; padding-top:12px; font-size:16px; font-weight:600; }
+  .qline.total b { font-size:26px; letter-spacing:.4px; }
+  .qline .sub { color:var(--muted); font-size:12px; }
+  .badge { display:inline-block; font-size:11.5px; padding:2px 9px; border-radius:999px; background:var(--brand-soft); color:var(--brand); }
+  .badge.warn { background:var(--warn-soft); color:var(--warn); }
+  .badge.ok { background:var(--ok-soft); color:var(--ok); }
+  .note { background:var(--gold-soft); border:1px solid #efdfc4; color:#7a5a1f; border-radius:12px; padding:12px 14px; font-size:12.5px; line-height:1.7; margin-top:12px; }
+  table.matrix { width:100%; border-collapse:collapse; font-size:13px; }
+  table.matrix th, table.matrix td { border:1px solid var(--line); padding:6px; text-align:center; }
+  table.matrix th { background:#f7f9fc; font-weight:600; font-size:12px; color:var(--muted); }
+  table.matrix input { width:88px; height:32px; border:1px solid var(--line); border-radius:8px; text-align:center; font-size:13px; }
+  details.settings { margin-top:14px; }
+  details.settings summary { cursor:pointer; font-size:14px; font-weight:600; padding:10px 0; }
+  .fee-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .fee-grid .field { margin-bottom:0; }
+  .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(8px); padding:9px 16px; border-radius:999px; background:rgba(19,26,36,.92); color:#fff; font-size:12.5px; opacity:0; pointer-events:none; transition:.22s; z-index:60; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .copy-area { margin-top:12px; display:none; }
+  .copy-area textarea { width:100%; height:220px; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:12.5px; line-height:1.7; resize:vertical; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns:1fr; } }
+.logo .fg { font-size: 14px; font-weight: 700; color: #f4e2bd; line-height: 1; }
+.logo .hk { position: absolute; right: 4px; bottom: 2px; font-size: 6px; color: rgba(244,226,189,.55); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><span class="fg">FG</span><span class="hk">HK</span></div>
+      <div>
+        <div class="brand-name">方行深港 · 包车报价器</div>
+        <div class="brand-sub">FONGGO QUOTE</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn small gold" id="topExport" style="color:#fff;border-color:transparent">导出价格 JSON</button>
+      <a class="btn small" href="admin.html" style="text-decoration:none;display:inline-flex;align-items:center">订单管理</a>
+      <a class="btn small" href="index.html" style="text-decoration:none;display:inline-flex;align-items:center">客户页</a>
+    </div>
+  </header>
+
+  <div style="height:14px"></div>
+
+  <div class="grid2">
+    <!-- 左：输入 -->
+    <div class="card">
+      <h2>行程信息</h2>
+
+      <div class="field-row">
+        <div class="field">
+          <label>出发地</label>
+          <select id="fromZone"></select>
+        </div>
+        <div class="field">
+          <label>目的地</label>
+          <select id="toZone"></select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>出发具体地点（可选）</label><input id="fromText" placeholder="如：皇庭广场" /></div>
+        <div class="field"><label>到达具体地点（可选）</label><input id="toText" placeholder="如：尖沙咀海港城" /></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>用车日期</label><input type="date" id="date" /></div>
+        <div class="field"><label>时间</label><input type="time" id="time" value="08:00" /></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>人数</label>
+          <div class="stepper"><button data-step="pax:-1">−</button><span id="paxVal">1</span><button data-step="pax:1">+</button></div>
+        </div>
+        <div class="field"><label>行李件数</label>
+          <div class="stepper"><button data-step="bags:-1">−</button><span id="bagsVal">1</span><button data-step="bags:1">+</button></div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>等候（小时）</label>
+          <div class="stepper"><button data-step="wait:-1">−</button><span id="waitVal">0</span><button data-step="wait:1">+</button></div>
+        </div>
+        <div class="field"><label>额外停靠点</label>
+          <div class="stepper"><button data-step="stops:-1">−</button><span id="stopsVal">0</span><button data-step="stops:1">+</button></div>
+        </div>
+      </div>
+
+      <div class="field" style="flex-direction:row;gap:18px;align-items:center">
+        <label class="switch"><input type="checkbox" id="childSeat" />儿童安全座椅</label>
+        <label class="switch"><input type="checkbox" id="holiday" />按节假日/周末加价</label>
+      </div>
+
+      <button class="btn primary block" id="calc">计算报价</button>
+      <div class="muted" style="margin-top:10px">夜间（22:00–06:00）自动加价；价格以客服最终确认为准。</div>
+    </div>
+
+    <!-- 右：结果 -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0">报价明细</h2>
+        <span id="priceTag" class="badge" style="display:none"></span>
+      </div>
+      <div id="result" style="margin-top:12px">
+        <div class="muted">填好左边信息，点「计算报价」。</div>
+      </div>
+      <div id="copyArea" class="copy-area">
+        <textarea id="copyText" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn small" id="copyBtn">复制报价话术</button>
+          <button class="btn small" id="saveBtn">存为记录</button>
+        </div>
+      </div>
+      <div class="note">隧道费、停车费、等候超时费、夜间/节假日以外的特殊加价需人工确认；本报价为参考口径。</div>
+    </div>
+  </div>
+
+  <details class="settings" id="settings">
+    <summary>价格设置（区域基础价 + 附加费）</summary>
+    <div class="card" style="margin-top:10px">
+      <h2>区域基础价（一口价）</h2>
+      <div class="muted" style="margin-bottom:10px">空着＝未定价，报价时会提示你补价。改完点保存。</div>
+      <div style="overflow-x:auto">
+        <table class="matrix" id="matrix"></table>
+      </div>
+
+      <h2 style="margin-top:18px">附加费规则</h2>
+      <div class="fee-grid">
+        <div class="field"><label>夜间加价（%）</label><input type="number" id="fNight" min="0" max="100" /></div>
+        <div class="field"><label>周末/节假日加价（%）</label><input type="number" id="fHoliday" min="0" max="100" /></div>
+        <div class="field"><label>等候（元/小时）</label><input type="number" id="fWait" min="0" /></div>
+        <div class="field"><label>额外停靠（元/点）</label><input type="number" id="fStop" min="0" /></div>
+        <div class="field"><label>儿童座椅（元）</label><input type="number" id="fSeat" min="0" /></div>
+        <div class="field"><label>行李免费件数</label><input type="number" id="fBagFree" min="0" /></div>
+        <div class="field"><label>超件（元/件）</label><input type="number" id="fBagOver" min="0" /></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn primary" id="saveCfg">保存设置</button>
+        <button class="btn" id="resetCfg">恢复默认</button>
+        <button class="btn" id="exportCfg">导出 JSON</button>
+        <button class="btn gold" id="copyCfg">复制价格 JSON</button>
+        <button class="btn" id="importCfg">导入 JSON</button>
+        <input type="file" id="fileCfg" accept="application/json" style="display:none" />
+      </div>
+    </div>
+  </details>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var ZONES = [
+    { code: 'SZ_CITY', label: '深圳市区', side: 'SZ' },
+    { code: 'SZ_AIRPORT', label: '深圳机场', side: 'SZ' },
+    { code: 'SZ_OTHER', label: '深圳其他（龙岗/坪山等）', side: 'SZ' },
+    { code: 'HK_KOWLOON', label: '香港九龙', side: 'HK' },
+    { code: 'HK_ISLAND', label: '香港岛', side: 'HK' },
+    { code: 'HK_NEW', label: '香港新界', side: 'HK' },
+    { code: 'HK_AIRPORT', label: '香港机场', side: 'HK' }
+  ];
+  var ZONE_LABEL = ZONES.reduce(function (m, z) { return (m[z.code] = z.label, m); }, {});
+
+  var DEFAULTS = {
+    matrix: {
+      'HK_KOWLOON|SZ_CITY': 500,
+      'HK_ISLAND|SZ_CITY': 600,
+      'HK_ISLAND|SZ_AIRPORT': 600
+    },
+    fees: { night: 20, holiday: 20, wait: 100, stop: 80, seat: 50, bagFree: 4, bagOver: 30 }
+  };
+
+  var LS = 'fx_pricing_v1';
+  var cfg = load();
+
+  function load() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(LS) || 'null');
+      if (raw && raw.matrix && raw.fees) return deepMerge(DEFAULTS, raw);
+    } catch (e) {}
+    return JSON.parse(JSON.stringify(DEFAULTS));
+  }
+  function deepMerge(a, b) {
+    var out = JSON.parse(JSON.stringify(a));
+    Object.keys(b.matrix || {}).forEach(function (k) { out.matrix[k] = b.matrix[k]; });
+    Object.keys(b.fees || {}).forEach(function (k) { out.fees[k] = b.fees[k]; });
+    return out;
+  }
+  function save() { try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (e) {} }
+  function toast(t) { var el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, 1800); }
+
+  function key(a, b) { return [a, b].sort().join('|'); }
+  function money(n) { return '¥' + Math.round(n); }
+  function round10(n) { return Math.round(n / 10) * 10; }
+
+  var state = { pax: 1, bags: 1, wait: 0, stops: 0 };
+
+  /* ---------- 表单 ---------- */
+  function fillZones() {
+    var from = document.getElementById('fromZone');
+    var to = document.getElementById('toZone');
+    ZONES.forEach(function (z) {
+      from.insertAdjacentHTML('beforeend', '<option value="' + z.code + '">' + z.label + '</option>');
+      to.insertAdjacentHTML('beforeend', '<option value="' + z.code + '">' + z.label + '</option>');
+    });
+    from.value = 'SZ_CITY';
+    to.value = 'HK_KOWLOON';
+    var d = new Date();
+    document.getElementById('date').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-step]');
+    if (!b) return;
+    var parts = b.dataset.step.split(':');
+    var name = parts[0], delta = Number(parts[1]);
+    var min = name === 'wait' || name === 'stops' ? 0 : 1;
+    var max = name === 'pax' ? 6 : 8;
+    state[name] = Math.max(min, Math.min(max, state[name] + delta));
+    document.getElementById(name + 'Val').textContent = state[name];
+  });
+
+  /* ---------- 计价 ---------- */
+  function compute() {
+    var from = document.getElementById('fromZone').value;
+    var to = document.getElementById('toZone').value;
+    if (from === to) return { error: '出发地和目的地属于同一区域，跨境包车请选择一深一港；同城用车请人工报价' };
+    var base = cfg.matrix[key(from, to)];
+    if (base == null || base === '') return { error: 'unpriced', from: from, to: to };
+
+    var time = document.getElementById('time').value || '08:00';
+    var hour = Number(time.split(':')[0]);
+    var night = hour >= 22 || hour < 6;
+    var holiday = document.getElementById('holiday').checked;
+    var seat = document.getElementById('childSeat').checked;
+    var f = cfg.fees;
+
+    var lines = [['基础价（一口价）', base, key(from, to)]];
+    if (night) lines.push(['夜间附加 ' + f.night + '%', round10(base * f.night / 100)]);
+    if (holiday) lines.push(['周末/节假日附加 ' + f.holiday + '%', round10(base * f.holiday / 100)]);
+    if (state.wait > 0) lines.push(['等候 ' + state.wait + ' 小时', state.wait * f.wait]);
+    if (state.stops > 0) lines.push(['额外停靠 ' + state.stops + ' 个点', state.stops * f.stop]);
+    if (seat) lines.push(['儿童安全座椅', f.seat]);
+    var over = Math.max(0, state.bags - f.bagFree);
+    if (over > 0) lines.push(['行李超 ' + over + ' 件', over * f.bagOver]);
+
+    var total = lines.reduce(function (n, l) { return n + l[1]; }, 0);
+    return {
+      from: from, to: to, base: base, night: night, holiday: holiday,
+      seat: seat, pax: state.pax, bags: state.bags, wait: state.wait, stops: state.stops,
+      lines: lines, total: round10(total),
+      time: time, date: document.getElementById('date').value,
+      fromText: document.getElementById('fromText').value.trim(),
+      toText: document.getElementById('toText').value.trim()
+    };
+  }
+
+  function renderResult(q) {
+    var box = document.getElementById('result');
+    var tag = document.getElementById('priceTag');
+    var copyArea = document.getElementById('copyArea');
+
+    if (q.error === 'unpriced') {
+      tag.style.display = 'none';
+      copyArea.style.display = 'none';
+      box.innerHTML =
+        '<div class="badge warn">该组合未定价</div>' +
+        '<div class="muted" style="margin-top:10px">' + ZONE_LABEL[q.from] + ' ↔ ' + ZONE_LABEL[q.to] + ' 还没有基础价。</div>' +
+        '<div class="field" style="margin-top:12px"><label>现在给这个组合填一个价（元）</label><input type="number" id="quickPrice" placeholder="例如 800" /></div>' +
+        '<button class="btn gold block" id="quickSave">保存并计算</button>';
+      document.getElementById('quickSave').onclick = function () {
+        var v = Number(document.getElementById('quickPrice').value);
+        if (!v || v <= 0) return toast('请填一个价格');
+        cfg.matrix[key(q.from, q.to)] = v;
+        save(); renderMatrix();
+        toast('已保存 ' + ZONE_LABEL[q.from] + ' ↔ ' + ZONE_LABEL[q.to] + ' = ¥' + v);
+        renderResult(compute());
+      };
+      return;
+    }
+    if (q.error) {
+      tag.style.display = 'none';
+      copyArea.style.display = 'none';
+      box.innerHTML = '<div class="badge warn">无法计算</div><div class="muted" style="margin-top:10px">' + q.error + '</div>';
+      return;
+    }
+
+    tag.style.display = 'inline-block';
+    tag.className = 'badge ok';
+    tag.textContent = '一口价';
+
+    var html = '<div class="quote-lines">';
+    html += '<div class="qline"><span>' + ZONE_LABEL[q.from] + ' → ' + ZONE_LABEL[q.to] + '<div class="sub">' + q.date + ' ' + q.time + ' · ' + q.pax + ' 人 · ' + q.bags + ' 件行李</div></span></div>';
+    q.lines.forEach(function (l) {
+      html += '<div class="qline"><span>' + l[0] + '</span><span>' + money(l[1]) + '</span></div>';
+    });
+    html += '<div class="qline total"><span>合计</span><b>' + money(q.total) + '</b></div></div>';
+    box.innerHTML = html;
+
+    copyArea.style.display = 'block';
+    document.getElementById('copyText').value = buildText(q);
+  }
+
+  function buildText(q) {
+    var lines = ['【方行深港 · 跨境包车报价】'];
+    var route = (q.fromText || ZONE_LABEL[q.from]) + ' → ' + (q.toText || ZONE_LABEL[q.to]);
+    lines.push(route);
+    lines.push(q.date + ' ' + q.time + ' · ' + q.pax + ' 人 · ' + q.bags + ' 件行李' + (q.seat ? ' · 儿童座椅' : ''));
+    lines.push('──────────');
+    q.lines.forEach(function (l) { lines.push(l[0] + '：' + money(l[1])); });
+    lines.push('合计：' + money(q.total));
+    lines.push('──────────');
+    lines.push('含：基础一口价' + (q.night ? '、夜间附加' : '') + (q.holiday ? '、周末/节假日附加' : ''));
+    lines.push('不含：隧道费、停车费、等候超时费（需人工确认）');
+    lines.push('证件提醒：请携带有效港澳通行证及对应有效签注。');
+    return lines.join('\n');
+  }
+
+  document.getElementById('calc').onclick = function () {
+    var q = compute();
+    renderResult(q);
+    if (!q.error) {
+      var el = document.getElementById('result');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  document.getElementById('copyBtn').onclick = function () {
+    var text = document.getElementById('copyText');
+    text.select();
+    var done = function () { toast('已复制，去微信粘贴'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text.value).then(done, function () { document.execCommand('copy'); done(); });
+    } else { document.execCommand('copy'); done(); }
+  };
+
+  document.getElementById('saveBtn').onclick = function () {
+    var q = compute();
+    if (q.error) return;
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem('fx_quotes_v1') || '[]'); } catch (e) {}
+    list.unshift(Object.assign({ at: new Date().toISOString() }, q));
+    try { localStorage.setItem('fx_quotes_v1', JSON.stringify(list.slice(0, 100))); } catch (e) {}
+    toast('已存为记录（本机）');
+  };
+
+  /* ---------- 设置 ---------- */
+  function renderMatrix() {
+    var sz = ZONES.filter(function (z) { return z.side === 'SZ'; });
+    var hk = ZONES.filter(function (z) { return z.side === 'HK'; });
+    var html = '<thead><tr><th>深圳 \\ 香港</th>';
+    hk.forEach(function (z) { html += '<th>' + z.label + '</th>'; });
+    html += '</tr></thead><tbody>';
+    sz.forEach(function (s) {
+      html += '<tr><th>' + s.label + '</th>';
+      hk.forEach(function (h) {
+        var v = cfg.matrix[key(s.code, h.code)];
+        html += '<td><input type="number" data-sz="' + s.code + '" data-hk="' + h.code + '" value="' + (v == null ? '' : v) + '" placeholder="未定" /></td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    document.getElementById('matrix').innerHTML = html;
+  }
+
+  function fillFees() {
+    var f = cfg.fees;
+    document.getElementById('fNight').value = f.night;
+    document.getElementById('fHoliday').value = f.holiday;
+    document.getElementById('fWait').value = f.wait;
+    document.getElementById('fStop').value = f.stop;
+    document.getElementById('fSeat').value = f.seat;
+    document.getElementById('fBagFree').value = f.bagFree;
+    document.getElementById('fBagOver').value = f.bagOver;
+  }
+
+  document.getElementById('saveCfg').onclick = function () {
+    var inputs = document.querySelectorAll('#matrix input');
+    Array.prototype.forEach.call(inputs, function (inp) {
+      var k = key(inp.dataset.sz, inp.dataset.hk);
+      var v = inp.value.trim();
+      if (v === '') delete cfg.matrix[k];
+      else cfg.matrix[k] = Number(v);
+    });
+    cfg.fees = {
+      night: Number(document.getElementById('fNight').value) || 0,
+      holiday: Number(document.getElementById('fHoliday').value) || 0,
+      wait: Number(document.getElementById('fWait').value) || 0,
+      stop: Number(document.getElementById('fStop').value) || 0,
+      seat: Number(document.getElementById('fSeat').value) || 0,
+      bagFree: Number(document.getElementById('fBagFree').value) || 0,
+      bagOver: Number(document.getElementById('fBagOver').value) || 0
+    };
+    save();
+    toast('设置已保存');
+  };
+
+  document.getElementById('resetCfg').onclick = function () {
+    cfg = JSON.parse(JSON.stringify(DEFAULTS));
+    save(); renderMatrix(); fillFees(); toast('已恢复默认');
+  };
+
+  document.getElementById('topExport').onclick = function () {
+    document.getElementById('settings').open = true;
+    var text = JSON.stringify(cfg, null, 2);
+    var done = function () { toast('价格 JSON 已复制，粘贴发我即可上线'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () {
+        document.getElementById('copyCfg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        toast('已展开价格设置，点下面的「复制价格 JSON」');
+      });
+    } else {
+      document.getElementById('copyCfg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast('已展开价格设置，点下面的「复制价格 JSON」');
+    }
+  };
+
+  document.getElementById('copyCfg').onclick = function () {
+    var text = JSON.stringify(cfg, null, 2);
+    var done = function () { toast('已复制，粘贴到微信发我即可上线'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { window.prompt('复制下面的内容：', text); });
+    } else { window.prompt('复制下面的内容：', text); }
+  };
+
+  document.getElementById('exportCfg').onclick = function () {
+    var blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'fonggo-pricing.json';
+    a.click();
+  };
+
+  document.getElementById('importCfg').onclick = function () { document.getElementById('fileCfg').click(); };
+  document.getElementById('fileCfg').onchange = function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(reader.result);
+        if (!data.matrix || !data.fees) throw new Error('格式不对');
+        cfg = deepMerge(DEFAULTS, data);
+        save(); renderMatrix(); fillFees(); toast('已导入');
+      } catch (err) { toast('导入失败：' + err.message); }
+    };
+    reader.readAsText(file);
+  };
+
+  /* ---------- 启动 ---------- */
+  fillZones();
+  renderMatrix();
+  fillFees();
+})();
+</script>
+</body>
+</html>
