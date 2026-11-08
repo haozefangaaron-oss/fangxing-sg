@@ -828,15 +828,57 @@ const ZONES = [
   { code: 'HK_AIRPORT', label: '香港机场', side: 'HK' }
 ];
 const ZONE_LABEL = ZONES.reduce((m, z) => (m[z.code] = z.label, m), {});
-/* 自助报价区域：市区 / 机场宝安龙岗 / 九龙 / 港岛 / 迪士尼 */
-const QUOTE_ZONES = [
-  { code: 'SZ_CITY', label: '市区' },
-  { code: 'SZ_AIRPORT', label: '机场宝安龙岗' },
-  { code: 'HK_KOWLOON', label: '九龙' },
-  { code: 'HK_ISLAND', label: '港岛' },
-  { code: 'HK_DISNEY', label: '迪士尼' }
+/* 行政区。zone 只用于一口价归类，不在下拉里显示。 */
+const DISTRICTS = [
+  { group: '深圳', code: 'SZ_FT', label: '福田区', zone: 'SZ_CITY' },
+  { group: '深圳', code: 'SZ_LH', label: '罗湖区', zone: 'SZ_CITY' },
+  { group: '深圳', code: 'SZ_NS', label: '南山区', zone: 'SZ_CITY' },
+  { group: '深圳', code: 'SZ_YT', label: '盐田区', zone: 'SZ_CITY' },
+  { group: '深圳', code: 'SZ_BA', label: '宝安区', zone: 'SZ_AIRPORT' },
+  { group: '深圳', code: 'SZ_LG', label: '龙岗区', zone: 'SZ_AIRPORT' },
+  { group: '深圳', code: 'SZ_LW', label: '龙华区', zone: 'SZ_CITY' },
+  { group: '深圳', code: 'SZ_PS', label: '坪山区', zone: 'SZ_CITY' },
+  { group: '深圳', code: 'SZ_GM', label: '光明区', zone: 'SZ_CITY' },
+  { group: '深圳', code: 'SZ_DP', label: '大鹏新区', zone: 'SZ_CITY' },
+  { group: '深圳', code: 'SZ_BA_AIR', label: '深圳宝安国际机场', zone: 'SZ_AIRPORT' },
+  { group: '香港', code: 'HK_CW', label: '中西区', zone: 'HK_ISLAND' },
+  { group: '香港', code: 'HK_WC', label: '湾仔区', zone: 'HK_ISLAND' },
+  { group: '香港', code: 'HK_EAST', label: '东区', zone: 'HK_ISLAND' },
+  { group: '香港', code: 'HK_SOUTH', label: '南区', zone: 'HK_ISLAND' },
+  { group: '香港', code: 'HK_YTM', label: '油尖旺区', zone: 'HK_KOWLOON' },
+  { group: '香港', code: 'HK_SSP', label: '深水埗区', zone: 'HK_KOWLOON' },
+  { group: '香港', code: 'HK_KLC', label: '九龙城区', zone: 'HK_KOWLOON' },
+  { group: '香港', code: 'HK_WTS', label: '黄大仙区', zone: 'HK_KOWLOON' },
+  { group: '香港', code: 'HK_KT', label: '观塘区', zone: 'HK_KOWLOON' },
+  { group: '香港', code: 'HK_TW', label: '荃湾区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_TM', label: '屯门区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_YL', label: '元朗区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_NORTH', label: '北区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_TP', label: '大埔区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_ST', label: '沙田区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_SK', label: '西贡区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_KC', label: '葵青区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_ISLANDS', label: '离岛区', zone: 'OTHER' },
+  { group: '香港', code: 'HK_DISNEY', label: '香港迪士尼', zone: 'HK_DISNEY' },
+  { group: '香港', code: 'HK_HKG', label: '香港国际机场', zone: 'OTHER' }
 ];
-const QUOTE_LABEL = QUOTE_ZONES.reduce((m, z) => (m[z.code] = z.label, m), {});
+const DISTRICT_BY = DISTRICTS.reduce((m, d) => (m[d.code] = d, m), {});
+function districtOptions(selected) {
+  return ['深圳', '香港'].map((group) => {
+    const opts = DISTRICTS.filter((d) => d.group === group).map((d) =>
+      '<option value="' + d.code + '"' + (selected === d.code ? ' selected' : '') + '>' + d.label + '</option>'
+    ).join('');
+    return '<optgroup label="' + group + '">' + opts + '</optgroup>';
+  }).join('');
+}
+function districtLabel(code) {
+  const d = DISTRICT_BY[code];
+  return d ? d.label : (AREA_LABEL[code] || ZONE_LABEL[code] || code || '');
+}
+function pricingZone(code) {
+  const d = DISTRICT_BY[code];
+  return d ? d.zone : (code || '');
+}
 /* 固定价。方向分开记；未列出的组合走人工确认。迪士尼只收「深圳 → 迪士尼」。 */
 const CHARTER_LIST = [
   { from: 'SZ_AIRPORT', to: 'HK_ISLAND', text: '深圳机场/宝安、龙岗 → 香港港岛', price: 658 },
@@ -850,9 +892,12 @@ const CHARTER_LIST = [
   { text: '深圳 → 香港迪士尼', price: 498, disney: true }
 ];
 function charterQuote(from, to) {
+  const a = pricingZone(from);
+  const b = pricingZone(to);
   if (!from || !to || from === to) return null;
-  if (to === 'HK_DISNEY' && (from === 'SZ_CITY' || from === 'SZ_AIRPORT')) return 498;
-  const row = CHARTER_LIST.find((r) => r.from === from && r.to === to);
+  if (!a || !b || a === 'OTHER' || b === 'OTHER') return null;
+  if (b === 'HK_DISNEY' && (a === 'SZ_CITY' || a === 'SZ_AIRPORT')) return 498;
+  const row = CHARTER_LIST.find((r) => r.from === a && r.to === b);
   return row ? row.price : null;
 }
 function zoneQuote(a, b) { return charterQuote(a, b); }
@@ -1037,8 +1082,8 @@ const S = {
   showTrips: false, payTab: 'wechat',
   q: '', results: [], searching: false,
   sheet: null, agreed: false, zoom: null,
-  pq: { from: 'SZ_CITY', to: 'HK_KOWLOON' },
-  now: { dest: 'HK_KOWLOON', status: 'idle', result: null },
+  pq: { from: 'SZ_FT', to: 'HK_YTM' },
+  now: { dest: 'HK_YTM', status: 'idle', result: null },
   showWxId: false,
   payAvail: { wechat: false, alipay: false }
 };
@@ -1810,12 +1855,12 @@ function payCards() {
 
 function pqResultHTML() {
   const a = S.pq.from, b = S.pq.to;
-  const fromLabel = QUOTE_LABEL[a] || a;
-  const toLabel = QUOTE_LABEL[b] || b;
-  if (a === b) return '<div class="muted" style="margin-top:10px">出发和目的地在同一区域，同城用车请咨询客服。</div>';
+  const fromLabel = districtLabel(a);
+  const toLabel = districtLabel(b);
+  if (a === b) return '<div class="muted" style="margin-top:10px">出发和目的地是同一个区，同区用车请咨询客服。</div>';
   const price = zoneQuote(a, b);
   if (price == null) {
-    return '<div class="muted" style="margin-top:10px">' + fromLabel + ' → ' + toLabel + ' 需人工确认。</div>' +
+    return '<div class="muted" style="margin-top:10px">' + fromLabel + ' → ' + toLabel + ' 需人工核价。</div>' +
       '<div class="seg" style="margin-top:12px"><a class="btn ghost" href="tel:' + CONFIG.contact.phone + '" style="text-decoration:none">电话问价</a><button data-act="wecom-add">添加企微问价</button></div>';
   }
   const big = price === 498 ? '¥498<span class="price-qi">起</span>' : ('¥' + price);
@@ -1868,10 +1913,10 @@ function viewPrice() {
       <div class="block-head"><h2>包车自助报价</h2><span class="muted">选两个区域，立即出价</span></div>
       <div class="field-row">
         <label class="field" style="flex:1"><span>出发区域</span>
-          <select id="pqFrom" class="sel">${QUOTE_ZONES.map((z) => `<option value="${z.code}" ${S.pq.from === z.code ? 'selected' : ''}>${z.label}</option>`).join('')}</select>
+          <select id="pqFrom" class="sel">${districtOptions(S.pq.from)}</select>
         </label>
         <label class="field" style="flex:1"><span>目的区域</span>
-          <select id="pqTo" class="sel">${QUOTE_ZONES.map((z) => `<option value="${z.code}" ${S.pq.to === z.code ? 'selected' : ''}>${z.label}</option>`).join('')}</select>
+          <select id="pqTo" class="sel">${districtOptions(S.pq.to)}</select>
         </label>
       </div>
       ${pqResultHTML()}
@@ -1930,7 +1975,7 @@ function viewNow() {
     </div>
     <label class="field"><span>出发地（选填）</span><input id="nowFrom" maxlength="40" placeholder="例如：福田口岸"></label>
     <label class="field"><span>目的地区域</span>
-      <select id="nowDest">${ZONES.map((z) => `<option value="${z.code}" ${S.now.dest === z.code ? 'selected' : ''}>${z.label}</option>`).join('')}</select>
+      <select id="nowDest">${districtOptions(S.now.dest)}</select>
     </label>
     <label class="field"><span>希望出发时间</span><input id="nowWhen" maxlength="40" placeholder="例如：今天 18:30，或写「请客服确认」"></label>
     <label class="field"><span>联系电话</span><input id="nowPhone" inputmode="tel" maxlength="20" placeholder="方便客服回你" value="${esc(phone)}"></label>
@@ -2269,7 +2314,7 @@ function submitNowIntent() {
   const order = {
     id: newOrderId('YX'), type: '立即用车',
     origin: from || '待沟通',
-    destination: ZONE_LABEL[dest] || dest || '待沟通',
+    destination: districtLabel(dest) || dest || '待沟通',
     when: when, phone: phone.replace(/\s+/g, ''), pax: 1, price: null,
     stage: 0, status: '已登记', paidDeclared: false, personalWechat: '',
     createdAt: new Date().toISOString()
@@ -2560,7 +2605,7 @@ document.addEventListener('click', (e) => {
   if (act === 'copy-order') return copy(val);
   if (act === 'call') { location.href = 'tel:' + CONFIG.contact.phone; return; }
   if (act === 'paytab') { S.payTab = val; render(); return; }
-  if (act === 'now-open') { S.now = { dest: 'HK_KOWLOON', status: 'idle', result: null }; S.view = 'now'; render(); return; }
+  if (act === 'now-open') { S.now = { dest: 'HK_YTM', status: 'idle', result: null }; S.view = 'now'; render(); return; }
   if (act === 'now-back') { S.view = 'home'; render(); return; }
   if (act === 'now-submit') { submitNowIntent(); return; }
   if (act === 'now-go' || act === 'now-pay') { toast('请先提交用车意向，由客服确认后再安排'); return; }
@@ -2607,11 +2652,11 @@ document.addEventListener('click', (e) => {
   if (act === 'order-back') { S.view = 'me'; S.tab = 'me'; render(); return; }
   if (act === 'pq-go') {
     const a = S.pq.from, b = S.pq.to;
-    if (!zoneQuote(a, b)) return toast('该线路需人工报价');
+    if (!zoneQuote(a, b)) return toast('该线路需人工核价');
     S.draft = {
-      originPlace: { name: QUOTE_LABEL[a] || ZONE_LABEL[a] || a, addr: '', cat: a },
-      destPlace: { name: QUOTE_LABEL[b] || ZONE_LABEL[b] || b, addr: '', cat: b },
-      originArea: a, destArea: b
+      originPlace: { name: districtLabel(a), addr: '', cat: pricingZone(a) },
+      destPlace: { name: districtLabel(b), addr: '', cat: pricingZone(b) },
+      originArea: pricingZone(a), destArea: pricingZone(b)
     };
     S.view = 'charter';
     S.step = 0;
