@@ -1030,7 +1030,7 @@ const IS_ALIPAY = /AlipayClient/i.test(navigator.userAgent);
 
 const S = {
   view: 'home', step: 0, draft: {}, order: null, tab: 'home',
-  showTrips: false, showCharterNote: false, payTab: 'wechat',
+  showTrips: false, payTab: 'wechat',
   q: '', results: [], searching: false,
   sheet: null, agreed: false, zoom: null,
   pq: { from: 'SZ_CITY', to: 'HK_KOWLOON' },
@@ -1361,14 +1361,13 @@ function viewHome() {
         <div class="peer-end">
           <span class="peer-foot"><b>¥498</b><em>起</em></span>
           <div class="peer-acts">
-            <button data-act="go" data-val="charter">预约报名</button>
-            <button class="${S.showCharterNote ? 'on' : ''}" data-act="charter-seats">空余位置</button>
+            <button data-act="now-open">立即用车</button>
+            <button data-act="go" data-val="charter">预约用车</button>
           </div>
         </div>
       </div>
     </section>
     ${S.showTrips ? `<div class="block"><div class="block-head"><h2>近期班次（参考）</h2><span class="muted">${next ? (soldOut ? '参考已满' : '参考余 ' + nextLeft + ' 座') : ''}</span></div>${tripRows(4)}<div class="muted" style="margin-top:8px">余位只是参考，以客服确认为准。</div></div>` : ''}
-    ${S.showCharterNote ? '<div class="reminder">包车余位与车辆以客服确认结果为准。这里只登记意向。</div>' : ''}
 
     ${wecomBlock(null)}
 
@@ -2467,7 +2466,6 @@ document.addEventListener('click', (e) => {
   if (act === 'go') return go(val);
   if (act === 'back') return back();
   if (act === 'toggle-trips') { S.showTrips = !S.showTrips; render(); return; }
-  if (act === 'charter-seats') { S.showCharterNote = !S.showCharterNote; render(); return; }
   if (act === 'clear-orders') { clearOrders(); render(); return toast('已清除本机记录'); }
   if (act === 'copy-wx') return copy(CONFIG.contact.wechat);
   if (act === 'copy-order') return copy(val);
