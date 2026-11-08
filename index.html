@@ -194,6 +194,10 @@
   .opt b { display: block; font-size: 15px; font-weight: 600; }
   .opt small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
   .opt .chev { color: #b9c2d0; font-size: 18px; }
+  .opt.on, .seat-card.on, .date-chip.on { border-color: var(--brand); background: var(--brand-soft); }
+  .form-sec { display: flex; flex-direction: column; gap: 10px; }
+  .form-sec > h2 { font-size: 18px; margin: 2px 0 0; }
+  .form-sec > p { color: var(--muted); font-size: 12.5px; }
 
   .dates { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }
   .dates::-webkit-scrollbar { display: none; }
@@ -1258,16 +1262,14 @@ function renderTop() {
   }
   if (S.view === 'bus' || S.view === 'charter') {
     const title = S.view === 'bus' ? '工作日通勤班车' : '深港跨境包车';
-    const steps = currentSteps();
-    const at = Math.min(S.step + 1, steps.length);
-    const p = at / steps.length;
-    top.style.setProperty('--tint', (p * 0.95).toFixed(2));
+    const sub = S.step > 0 ? '确认意向' : '填写预约';
+    top.style.setProperty('--tint', S.step > 0 ? 0.4 : 0);
     top.innerHTML = `
       <div class="flow-top">
         <button class="back" data-act="back" aria-label="返回">‹</button>
         <div>
           <div class="flow-title">${title}</div>
-          <div class="flow-step"><span class="step-ring" style="--p:${p}"><svg viewBox="0 0 20 20"><circle class="trk" cx="10" cy="10" r="8"/><circle class="bar" cx="10" cy="10" r="8"/></svg></span>第 ${at} / ${steps.length} 步</div>
+          <div class="flow-step">${sub}</div>
         </div>
       </div>
       <a class="icon-btn" href="tel:${CONFIG.contact.phone}">客服</a>`;
@@ -1403,15 +1405,44 @@ const CHARTER_TITLE = {
 };
 
 function viewBus() {
-  const steps = busSteps();
-  const key = steps[S.step];
-  const t = BUS_TITLE[key];
-  return `
-  <div class="view">
-    <div class="step-head">
-      <h2>${t[0]}</h2><p>${t[1]}</p>
-    </div>
-    ${busBody(key)}
+  if (S.step > 0) {
+    return `<div class="view">
+      <div class="step-head"><h2>确认行程</h2><p>核对后提交意向。余位以客服确认为准。</p></div>
+      ${busBody('confirm')}
+    </div>`;
+  }
+  const d = S.draft;
+  const p = lastPax();
+  return `<div class="view form-page">
+    <div class="step-head"><h2>填写预约</h2><p>方向、日期、座位和乘车人一次填完。余位仅供参考，以客服确认为准。</p></div>
+    <section class="form-sec">
+      <h2>选择方向</h2>
+      <p>去程：福田 → 香港IFC；返程：IFC → 深圳</p>
+      ${busBody('direction')}
+    </section>
+    ${d.direction === '返程' ? `<section class="form-sec"><h2>选择送达点</h2><p>返程可送到口岸，或直接送到家门口</p>${busBody('dropoff')}${d.dropoff === '家门口' ? busBody('home') : ''}</section>` : ''}
+    <section class="form-sec">
+      <h2>选择日期</h2>
+      <p>仅周一至周五工作日运行，前一日 20:00 截止报名</p>
+      ${busBody('date')}
+    </section>
+    <section class="form-sec">
+      <h2>选择座位</h2>
+      <p>每车 5 座。页面余位仅供参考，以客服确认为准</p>
+      ${d.date ? busBody('seat') : '<div class="muted">请先选择日期，再看座位余位。</div>'}
+    </section>
+    <section class="form-sec">
+      <h2>乘车人信息</h2>
+      <p>司机与客服会用这个号码联系你</p>
+      <label class="field"><span>乘车人姓名</span>
+        <input name="name" maxlength="20" placeholder="例如：陈小明" value="${esc(d.name || p.name || '')}">
+      </label>
+      <label class="field"><span>联系电话</span>
+        <input name="phone" inputmode="tel" placeholder="8–15 位号码，方便司机联系" value="${esc(d.phone || p.phone || '')}">
+      </label>
+      <div class="muted" style="text-align:center">仅用于本次行程联系</div>
+    </section>
+    <button class="btn primary block" data-act="bus-form-next">下一步</button>
   </div>`;
 }
 
@@ -1419,10 +1450,10 @@ function busBody(key) {
   const d = S.draft;
   if (key === 'direction') {
     return `<div class="options">
-      <button class="opt" data-act="bus-dir" data-val="去程">
+      <button class="opt ${d.direction === '去程' ? 'on' : ''}" data-act="bus-dir" data-val="去程">
         <div><b>去程 · 福田 → 香港IFC</b><small>福田站12号出口 7:45 集合 · 7:50 发车</small></div><span class="chev">›</span>
       </button>
-      <button class="opt" data-act="bus-dir" data-val="返程">
+      <button class="opt ${d.direction === '返程' ? 'on' : ''}" data-act="bus-dir" data-val="返程">
         <div><b>返程 · 香港IFC → 深圳</b><small>IFC二期落客区 18:40 集合发车</small></div><span class="chev">›</span>
       </button>
     </div>`;
@@ -1430,12 +1461,12 @@ function busBody(key) {
   if (key === 'date') {
     const chips = upcoming(10).map((dt) => {
       const k = ymd(dt);
-      const left = seatsLeft(availability(k, d.direction));
+      const left = seatsLeft(availability(k, d.direction || '去程'));
       const closed = !bookable(dt);
       const badge = closed ? '<span class="left" style="color:#b45309">已截止</span>'
         : left === 0 ? '<span class="left" style="color:#b45309">已满</span>'
         : `<span class="left" style="color:#177a52">余 ${left}</span>`;
-      return `<button class="date-chip" data-act="bus-date" data-val="${k}" ${closed || left === 0 ? 'disabled' : ''}>
+      return `<button class="date-chip ${d.date === k ? 'on' : ''}" data-act="bus-date" data-val="${k}" ${closed || left === 0 ? 'disabled' : ''}>
         <span class="wd">${WD[dt.getDay()]}</span><span class="dd">${dt.getMonth() + 1}/${dt.getDate()}</span>${badge}
       </button>`;
     }).join('');
@@ -1446,16 +1477,16 @@ function busBody(key) {
         <div class="tl" id="dateTL">
           <div class="tl-head"><b>—</b><span>—</span></div>
           <ol class="tl-list">
-            <li><i></i><div><b>7:45</b> 福田站 12 号出口集合</div></li>
-            <li><i></i><div><b>7:50</b> 准时发车，过皇岗口岸</div></li>
-            <li><i></i><div><b>≈8:40</b> 香港 IFC 二期落客</div></li>
+            ${(d.direction === '返程')
+              ? '<li><i></i><div><b>18:40</b> IFC 二期落客区集合发车</div></li><li><i></i><div><b>过关</b> 皇岗口岸，耗时以现场为准</div></li><li><i></i><div><b>送达</b> 口岸或家门口，以确认为准</div></li>'
+              : '<li><i></i><div><b>7:45</b> 福田站 12 号出口集合</div></li><li><i></i><div><b>7:50</b> 准时发车，过皇岗口岸</div></li><li><i></i><div><b>≈8:40</b> 香港 IFC 二期落客</div></li>'}
           </ol>
         </div>
         <div class="muted" style="font-size:11px;margin-top:8px">左右滑动，松手自动居中 · 下方时刻随日期更新</div>
         <div class="field" style="margin-top:10px">
           <span>其他日期（任意工作日）</span>
           <div class="field-row">
-            <input type="date" id="otherDate" min="${ymd(new Date())}">
+            <input type="date" id="otherDate" min="${ymd(new Date())}" value="${esc(d.otherDate || '')}">
             <button class="btn ghost small nowrap" data-act="bus-date-other">查看余位</button>
           </div>
         </div>
@@ -1468,7 +1499,7 @@ function busBody(key) {
     const cards = SEATS.map((s) => {
       const left = av[s.id];
       const badge = left === 0 ? '<span class="pill off">已满</span>' : `<span class="pill ok">剩 ${left}/${s.cap}</span>`;
-      return `<button class="seat-card" data-act="bus-seat" data-val="${s.id}" ${left === 0 ? 'disabled' : ''}>
+      return `<button class="seat-card ${d.seat === s.id ? 'on' : ''}" data-act="bus-seat" data-val="${s.id}" ${left === 0 ? 'disabled' : ''}>
         <div><div class="s-name">${s.name}</div><div class="s-sub">${s.sub}</div></div>
         <div class="seat-right">${badge}<div class="s-price">¥${s.price}</div></div>
       </button>`;
@@ -1480,10 +1511,10 @@ function busBody(key) {
   }
   if (key === 'dropoff') {
     return `<div class="options">
-      <button class="opt" data-act="bus-drop" data-val="皇岗口岸">
+      <button class="opt ${d.dropoff === '皇岗口岸' ? 'on' : ''}" data-act="bus-drop" data-val="皇岗口岸">
         <div><b>皇岗口岸</b><small>下车点即口岸</small></div><span class="chev">›</span>
       </button>
-      <button class="opt" data-act="bus-drop" data-val="家门口">
+      <button class="opt ${d.dropoff === '家门口' ? 'on' : ''}" data-act="bus-drop" data-val="家门口">
         <div><b>家门口</b><small>送到你家门口 · 可搜索或定位地址</small></div><span class="chev">›</span>
       </button>
     </div>`;
@@ -1571,22 +1602,40 @@ function fmtClock(mins) {
 }
 
 function viewCharter() {
-  const steps = charterSteps();
-  const key = steps[S.step];
-  const t = CHARTER_TITLE[key];
-  return `
-  <div class="view">
-    <div class="step-head">
-      <h2>${t[0]}</h2><p>${t[1]}</p>
-    </div>
-    ${charterBody(key)}
+  if (S.step > 0) {
+    return `<div class="view">
+      <div class="step-head"><h2>确认行程</h2><p>核对后提交意向。车辆与时间以客服确认为准。</p></div>
+      ${charterBody('confirm')}
+    </div>`;
+  }
+  return `<div class="view form-page">
+    <div class="step-head"><h2>填写预约</h2><p>出发地、目的地、时间和乘车信息一次填完。报价区域按地点自动带出。</p></div>
+    <section class="form-sec">
+      <h2>出发地</h2>
+      <p>搜索具体地点，或直接使用当前位置</p>
+      ${placeStep('origin')}
+    </section>
+    <section class="form-sec">
+      <h2>目的地</h2>
+      <p>香港岛 / 九龙 / 深圳市区 / 机场</p>
+      ${placeStep('dest')}
+    </section>
+    <section class="form-sec">
+      <h2>用车时间</h2>
+      <p>请选择日期与具体时间</p>
+      ${charterBody('time')}
+    </section>
+    <section class="form-sec">
+      <h2>乘车信息</h2>
+      <p>人数、儿童座椅与行李</p>
+      ${charterBody('detail')}
+    </section>
+    <button class="btn primary block" data-act="charter-form-next">下一步</button>
   </div>`;
 }
 
 function placeKind() {
-  if (S.view === 'bus') return 'home';
-  const k = currentSteps()[S.step];
-  return k === 'dest' ? 'dest' : 'origin';
+  return S.placeKind || (S.view === 'bus' ? 'home' : 'origin');
 }
 
 function resultsHTML(kind) {
@@ -1606,32 +1655,25 @@ function placeStep(kind) {
   const areaKey = kind + 'Area';
   const picked = d[pickedKey];
   const act = 'pick-' + kind;
-  const needArea = kind !== 'home';
 
   if (picked) {
+    const tag = areaKey && d[areaKey] && AREA_LABEL[d[areaKey]] && d[areaKey] !== 'OTHER' ? AREA_LABEL[d[areaKey]] : '';
     return `
       <div class="picked">
-        <div><b>${esc(picked.name)}</b><small>${esc(picked.addr || '')}</small></div>
+        <div><b>${esc(picked.name)}</b><small>${esc(picked.addr || '')}${tag ? ' · ' + esc(tag) : ''}</small></div>
         <button class="link" data-act="clear-place" data-val="${kind}">重选</button>
-      </div>
-      ${needArea ? `<div class="block">
-        <div class="muted" style="margin-bottom:8px">所属区域（决定报价，可修改）</div>
-        <div class="chips">
-          ${AREAS.map((a) => `<button class="chip ${d[areaKey] === a.code ? 'on' : ''}" data-act="set-area" data-val="${kind}:${a.code}">${a.label}</button>`).join('')}
-        </div>
-      </div>` : ''}
-      <button class="btn primary block" data-act="place-next" data-val="${kind}">下一步</button>`;
+      </div>`;
   }
 
   const recent = recentPlaces();
   return `
     <div class="searchbox">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="placeSearch" autocomplete="off" placeholder="搜索地点，如「皇庭广场」「海港城」" value="${esc(S.q)}">
+      <input id="placeSearch-${kind}" data-kind="${kind}" autocomplete="off" placeholder="搜索地点，如「皇庭广场」「海港城」" value="${esc(S.placeKind === kind ? S.q : '')}">
     </div>
     ${CONFIG.amapKey ? '' : '<div class="muted" style="font-size:11.5px">当前为常用地点库；找不到可手动填写，或联系客服确认地址</div>'}
-    <div class="results" id="placeResults">${resultsHTML(kind)}</div>
-    ${!S.q && recent.length ? `
+    <div class="results" id="placeResults-${kind}">${S.placeKind === kind ? resultsHTML(kind) : ''}</div>
+    ${!(S.placeKind === kind && S.q) && recent.length ? `
       <div class="block">
         <div class="block-head"><h2>最近使用</h2></div>
         <div class="results">
@@ -1649,7 +1691,7 @@ function placeStep(kind) {
     <div class="block">
       <div class="muted" style="margin-bottom:8px">手动填写（找不到就自己写）</div>
       <div class="field-row">
-        <input id="manualPlace" placeholder="例如：香港 皇后大道中 99 号" maxlength="60">
+        <input id="manualPlace-${kind}" placeholder="例如：香港 皇后大道中 99 号" maxlength="60">
         <button class="btn ghost small nowrap" data-act="manual-${kind}">使用</button>
       </div>
     </div>`;
@@ -1661,8 +1703,11 @@ function charterBody(key) {
   if (key === 'dest') return placeStep('dest');
 
   if (key === 'time') {
+    const routeLine = (d.originPlace || d.destPlace)
+      ? `<div class="muted" style="margin-bottom:8px">${esc(d.originPlace ? d.originPlace.name : '出发地')} → ${esc(d.destPlace ? d.destPlace.name : '目的地')}</div>`
+      : '';
     return `<div class="block">
-      <div class="muted" style="margin-bottom:8px">${esc(d.originPlace ? d.originPlace.name : '')} → ${esc(d.destPlace ? d.destPlace.name : '')}</div>
+      ${routeLine}
       <div class="field"><span>用车日期</span><input type="date" id="charterDate" min="${ymd(new Date())}" value="${esc(d.date || '')}"></div>
       <div class="gap-8"></div>
       <div class="field"><span>具体时间</span>
@@ -1674,8 +1719,7 @@ function charterBody(key) {
         </div>
       </div>
       <div class="muted" style="text-align:center">上下拖动选择，松手自动吸附到最近刻度</div>
-    </div>
-    <button class="btn primary block" data-act="charter-time">下一步</button>`;
+    </div>`;
   }
   if (key === 'detail') {
     const pax = d.pax || 1;
@@ -1693,7 +1737,7 @@ function charterBody(key) {
         <div class="label">行李件数<small>28 寸约 1 件 / 人</small></div>
         <div class="ctrl"><button data-act="bags" data-val="-1" ${bags <= 0 ? 'disabled' : ''}>−</button><span>${bags}</span><button data-act="bags" data-val="1" ${bags >= 8 ? 'disabled' : ''}>+</button></div>
       </div>
-      <button class="btn primary block" data-act="charter-detail">下一步</button>`;
+      `;
   }
   if (key === 'confirm') {
     if (d.originPlace && d.originPlace.loc && d.destPlace && d.destPlace.loc && !S.tripEta && !S.tripEtaLoading) {
@@ -2456,9 +2500,54 @@ function afterRender() {
 }
 
 /* actions */
+function stashLive() {
+  const name = document.querySelector('input[name=name]');
+  const phone = document.querySelector('input[name=phone]');
+  if (name) S.draft.name = name.value;
+  if (phone) S.draft.phone = phone.value;
+  const cd = document.getElementById('charterDate');
+  if (cd && cd.value) S.draft.date = cd.value;
+  const wheel = document.getElementById('timeWheel');
+  if (wheel && wheel.dataset.value) S.draft.time = wheel.dataset.value;
+  const other = document.getElementById('otherDate');
+  if (other && other.value) S.draft.otherDate = other.value;
+}
+function busFormNext() {
+  stashLive();
+  const d = S.draft;
+  if (!d.direction) return toast('请选择方向');
+  if (!d.date) return toast('请选择日期');
+  if (!d.seat) return toast('请选择座位');
+  if (d.direction === '返程') {
+    if (!d.dropoff) return toast('请选择送达点');
+    if (d.dropoff === '家门口' && !d.homePlace) return toast('请填写送到家门口的地址');
+  }
+  const name = (d.name || '').trim();
+  const phone = (d.phone || '').trim();
+  if (name.length < 1 || name.length > 20) return toast('请填写乘车人姓名');
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 8 || digits.length > 15) return toast('请检查联系电话');
+  d.name = name;
+  d.phone = phone.replace(/\s+/g, '');
+  S.step = 1;
+  render();
+}
+function charterFormNext() {
+  stashLive();
+  const d = S.draft;
+  if (!d.originPlace) return toast('请选择出发地');
+  if (!d.destPlace) return toast('请选择目的地');
+  if (!d.date) return toast('请选择用车日期');
+  if (parseISO(d.date) < startOfDay(new Date())) return toast('用车日期不能早于今天');
+  if (!d.time) return toast('请选择具体时间');
+  S.step = 1;
+  render();
+}
+
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-act]');
   if (!el) return;
+  stashLive();
   const act = el.dataset.act;
   const val = el.dataset.val;
 
@@ -2525,7 +2614,7 @@ document.addEventListener('click', (e) => {
       originArea: a, destArea: b
     };
     S.view = 'charter';
-    S.step = 2;
+    S.step = 0;
     render();
     return;
   }
@@ -2549,12 +2638,18 @@ document.addEventListener('click', (e) => {
   if (act === 'pick-date') {
     const dt = parseISO(val);
     if (!isOperating(dt) || !bookable(dt) || seatsLeft(availability(val, '去程')) === 0) return toast('这个班次不可预约');
-    S.view = 'bus'; S.draft = { direction: '去程', date: val }; S.step = 2; render();
+    S.view = 'bus'; S.draft = { direction: '去程', date: val }; S.step = 0; render();
     return;
   }
 
-  if (act === 'bus-dir') { S.draft.direction = val; S.step = 1; render(); return; }
-  if (act === 'bus-date') { S.draft.date = val; S.step = 2; render(); return; }
+  if (act === 'bus-dir') {
+    S.draft.direction = val;
+    if (val !== '返程') { S.draft.dropoff = ''; S.draft.homePlace = null; }
+    S.step = 0;
+    render();
+    return;
+  }
+  if (act === 'bus-date') { S.draft.date = val; S.step = 0; render(); return; }
   if (act === 'bus-date-other') {
     const v = ($('#otherDate') || {}).value;
     if (!v) return toast('请先选一个日期');
@@ -2562,11 +2657,11 @@ document.addEventListener('click', (e) => {
     if (!isOperating(dt)) return toast('该日是周末或公众假期，班车停运');
     if (!bookable(dt)) return toast('已过前一日 20:00 截止时间');
     if (seatsLeft(availability(v, S.draft.direction)) === 0) return toast('该日已满，换一天试试');
-    S.draft.date = v; S.step = 2; render(); return;
+    S.draft.date = v; S.draft.otherDate = v; S.step = 0; render(); return;
   }
-  if (act === 'bus-seat') { S.draft.seat = val; S.step += 1; render(); return; }
-  if (act === 'bus-drop') { S.draft.dropoff = val; S.step += 1; render(); return; }
-  if (act === 'bus-info-next') return submitBusInfo();
+  if (act === 'bus-seat') { S.draft.seat = val; S.step = 0; render(); return; }
+  if (act === 'bus-drop') { S.draft.dropoff = val; S.step = 0; render(); return; }
+  if (act === 'bus-form-next' || act === 'bus-info-next') return busFormNext();
   if (act === 'bus-submit') return doneThen(el, submitBus);
 
   if (act === 'pick-origin' || act === 'pick-dest' || act === 'pick-home') {
@@ -2596,14 +2691,13 @@ document.addEventListener('click', (e) => {
   }
   if (act === 'place-next') {
     if (!S.draft[val + 'Place']) return toast('请先选择地点');
-    if (val !== 'home' && !S.draft[val + 'Area']) return toast('请选择所属区域');
-    S.step += 1; S.q = ''; S.results = [];
+    S.q = ''; S.results = [];
     render();
     return;
   }
   if (act === 'manual-origin' || act === 'manual-dest' || act === 'manual-home') {
     const kind = act.replace('manual-', '');
-    const v = (($('#manualPlace') || {}).value || '').trim();
+    const v = (($('#manualPlace-' + kind) || {}).value || '').trim();
     if (!v) return toast('请填写地点');
     const place = { name: v, addr: '', cat: guessArea({ name: v, addr: '' }) };
     S.draft[kind + 'Place'] = place;
@@ -2638,19 +2732,12 @@ document.addEventListener('click', (e) => {
       S.draft[kind + 'Area'] = place.cat;
       pushRecent(place);
       render();
-      if (place.cat === 'OTHER') toast('已定位，请确认所属区域');
+      if (place.cat === 'OTHER') toast('已定位。这条线路的报价由客服确认');
     }, () => toast('定位失败，请手动填写地点'), { timeout: 8000 });
     return;
   }
 
-  if (act === 'charter-time') {
-    const date = ($('#charterDate') || {}).value;
-    const time = S.draft.time || (($('#timeWheel') || {}).dataset || {}).value;
-    if (!date) return toast('请选择用车日期');
-    if (parseISO(date) < startOfDay(new Date())) return toast('用车日期不能早于今天');
-    if (!time) return toast('请选择具体时间');
-    S.draft.date = date; S.draft.time = time; S.step += 1; render(); return;
-  }
+  if (act === 'charter-form-next' || act === 'charter-time' || act === 'charter-detail') return charterFormNext();
   if (act === 'pax') { S.draft.pax = Math.max(1, Math.min(6, (S.draft.pax || 1) + Number(val))); render(); return; }
   if (act === 'bags') { S.draft.bags = Math.max(0, Math.min(8, (S.draft.bags == null ? 1 : S.draft.bags) + Number(val))); render(); return; }
   if (act === 'childseat') { S.draft.childseat = val === '1'; render(); return; }
@@ -2702,20 +2789,22 @@ document.addEventListener('change', (e) => {
 });
 
 document.addEventListener('input', (e) => {
-  if (!e.target || e.target.id !== 'placeSearch') return;
+  if (!e.target || !e.target.id || e.target.id.indexOf('placeSearch-') !== 0) return;
+  const kind = e.target.id.slice('placeSearch-'.length);
   const q = e.target.value;
+  S.placeKind = kind;
   S.q = q;
   clearTimeout(searchTimer);
-  const box = document.getElementById('placeResults');
+  const box = document.getElementById('placeResults-' + kind);
   if (!q.trim()) {
     S.results = [];
     S.searching = false;
-    if (box) box.innerHTML = resultsHTML(placeKind());
+    if (box) box.innerHTML = '';
     return;
   }
   S.results = [];
   S.searching = true;
-  if (box) box.innerHTML = resultsHTML(placeKind());
+  if (box) box.innerHTML = resultsHTML(kind);
   const seq = ++searchSeq;
   searchTimer = setTimeout(async () => {
     let results = null;
@@ -2723,8 +2812,8 @@ document.addEventListener('input', (e) => {
     if (seq !== searchSeq) return;
     S.results = (results && results.length) ? results : searchLocal(q);
     S.searching = false;
-    const live = document.getElementById('placeResults');
-    if (live) live.innerHTML = resultsHTML(placeKind());
+    const live = document.getElementById('placeResults-' + kind);
+    if (live) live.innerHTML = resultsHTML(kind);
   }, 280);
 });
 
@@ -2739,6 +2828,7 @@ document.addEventListener('submit', (e) => {
   if (digits.length < 8 || digits.length > 15) return toast('请检查联系电话');
   S.draft.name = name;
   S.draft.phone = phone.replace(/\s+/g, '');
+  if (S.view === 'bus' && S.step === 0) return busFormNext();
   S.step += 1;
   render();
 });
