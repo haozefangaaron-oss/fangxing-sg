@@ -618,7 +618,7 @@
   .peers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .peer {
     min-height: 198px; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
-    padding: 14px 13px 12px; border-radius: 20px; cursor: pointer; border: 1px solid transparent;
+    padding: 14px 13px 12px; border-radius: 20px; cursor: default; border: 1px solid transparent;
   }
   .peer.navy {
     background: linear-gradient(168deg, var(--hero-1), var(--hero-2));
@@ -640,6 +640,15 @@
   .peer-cta { flex: 0 0 auto; font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 5px 8px; letter-spacing: .02em; }
   .peer.navy .peer-cta { background: var(--hero-ink); color: var(--brand); }
   .peer.gold .peer-cta { background: #1d3348; color: #f6f2e9; }
+  .peer-end { margin-top: auto; width: 100%; }
+  .peer-end .peer-foot { justify-content: flex-start; align-items: baseline; gap: 2px; }
+  .peer-acts { margin-top: 8px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .peer-acts button {
+    height: 30px; border: 0; border-radius: 999px; padding: 0 4px; cursor: pointer;
+    background: #f6f1e6; color: #1a2c3f; font-size: 12px; font-weight: 700;
+  }
+  .peer.gold .peer-acts button { background: rgba(255,252,246,.94); color: #3a2b10; }
+  .peer-acts button.on { box-shadow: inset 0 0 0 1.5px rgba(26,44,63,.35); }
   .charter-panel { cursor: default; }
   .charter-mods { margin-top: 12px; width: 100%; display: grid; grid-template-rows: 1fr 1fr; gap: 8px; flex: 1 1 auto; }
   .charter-mod {
@@ -1021,7 +1030,7 @@ const IS_ALIPAY = /AlipayClient/i.test(navigator.userAgent);
 
 const S = {
   view: 'home', step: 0, draft: {}, order: null, tab: 'home',
-  showTrips: false, payTab: 'wechat',
+  showTrips: false, showCharterNote: false, payTab: 'wechat',
   q: '', results: [], searching: false,
   sheet: null, agreed: false, zoom: null,
   pq: { from: 'SZ_CITY', to: 'HK_KOWLOON' },
@@ -1332,38 +1341,34 @@ function viewHome() {
       <p class="hero-lead">预约登记，人工确认。通勤班车与包车接送可以一起看，余位和车辆都等客服回你。</p>
     </section>
 
-    <section class="commute-row" aria-label="通勤班车">
-      <div class="trip-side">
-        <button class="fold2 ${S.showTrips ? 'open' : ''}" data-act="toggle-trips">
-          <span>近期班次（参考）</span>
-          <span class="fold2-go">${next ? `${next.getMonth() + 1}/${next.getDate()} · ${soldOut ? '参考已满' : '参考余 ' + nextLeft + ' 座'}` : '暂无'} <i class="chev">›</i></span>
-        </button>
-        ${S.showTrips ? `<div class="fold-body">${tripRows(3)}<div class="muted" style="padding:2px 2px 6px;font-size:11px">余位仅供参考，以客服确认为准。</div></div>` : '<div style="flex:1"></div>'}
-      </div>
-      <button class="peer navy" data-act="go" data-val="bus">
+    <section class="peers" aria-label="预约入口">
+      <div class="peer navy">
         <span class="peer-kicker">通勤班车</span>
         <span class="peer-title">福田 ↔ 香港 IFC</span>
         <span class="peer-sub">工作日 07:45 集合<br>返程 18:40</span>
-        <span class="peer-foot"><span><b>¥108</b><em>起</em></span><span class="peer-cta">登记意向</span></span>
-      </button>
-    </section>
-
-    <section class="p2p" aria-label="深港点对点">
-      <div class="p2p-top">
-        <div>
-          <div class="p2p-kicker">包车 / 接送</div>
-          <div class="p2p-title">深港点对点</div>
-          <div class="p2p-route">市区 → 九龙</div>
+        <div class="peer-end">
+          <span class="peer-foot"><b>¥108</b><em>起</em></span>
+          <div class="peer-acts">
+            <button data-act="go" data-val="bus">预约报名</button>
+            <button class="${S.showTrips ? 'on' : ''}" data-act="toggle-trips">空余位置</button>
+          </div>
         </div>
-        <div class="p2p-price">¥498<span>起</span></div>
       </div>
-      <button class="link2" data-act="tab" data-val="price">查看报价</button>
-      <div class="p2p-acts">
-        <button data-act="now-open">立即用车</button>
-        <button data-act="go" data-val="charter">预约用车</button>
+      <div class="peer gold">
+        <span class="peer-kicker">包车 / 接送</span>
+        <span class="peer-title">深港点对点</span>
+        <span class="peer-sub">时间与线路人工确认</span>
+        <div class="peer-end">
+          <span class="peer-foot"><b>¥498</b><em>起</em></span>
+          <div class="peer-acts">
+            <button data-act="go" data-val="charter">预约报名</button>
+            <button class="${S.showCharterNote ? 'on' : ''}" data-act="charter-seats">空余位置</button>
+          </div>
+        </div>
       </div>
-      <p class="p2p-note">登记意向，客服确认车辆和时间。</p>
     </section>
+    ${S.showTrips ? `<div class="block"><div class="block-head"><h2>近期班次（参考）</h2><span class="muted">${next ? (soldOut ? '参考已满' : '参考余 ' + nextLeft + ' 座') : ''}</span></div>${tripRows(4)}<div class="muted" style="margin-top:8px">余位只是参考，以客服确认为准。</div></div>` : ''}
+    ${S.showCharterNote ? '<div class="reminder">包车余位与车辆以客服确认结果为准。这里只登记意向。</div>' : ''}
 
     ${wecomBlock(null)}
 
@@ -2462,6 +2467,7 @@ document.addEventListener('click', (e) => {
   if (act === 'go') return go(val);
   if (act === 'back') return back();
   if (act === 'toggle-trips') { S.showTrips = !S.showTrips; render(); return; }
+  if (act === 'charter-seats') { S.showCharterNote = !S.showCharterNote; render(); return; }
   if (act === 'clear-orders') { clearOrders(); render(); return toast('已清除本机记录'); }
   if (act === 'copy-wx') return copy(CONFIG.contact.wechat);
   if (act === 'copy-order') return copy(val);
