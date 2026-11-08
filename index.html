@@ -254,6 +254,14 @@
   .picked b { font-size: 15px; }
   .picked .link { flex: 0 0 auto; white-space: nowrap; align-self: center; }
   .picked small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .place-tap {
+    width: 100%; text-align: left; border: 1px solid var(--line); background: var(--card);
+    border-radius: 12px; padding: 12px 14px; cursor: pointer; min-height: 52px;
+  }
+  .place-tap b { display: block; font-size: 15px; }
+  .place-tap small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+  .place-tap .ph { color: var(--muted); font-size: 14px; }
+  .amap-foot { text-align: center; font-size: 11px; color: var(--muted); margin-top: 8px; }
   .fares { display: flex; flex-wrap: wrap; gap: 0 18px; padding-top: 11px; border-top: 1px solid var(--line-2); }
   .fares span { font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; }
   .fares span b { font-weight: 400; color: var(--muted); margin-right: 5px; font-size: 12px; }
@@ -1058,6 +1066,57 @@ async function searchAmap(q) {
     return out;
   } catch (err) {
     return null;
+  }
+}
+
+/** 立即用车选点：优先高德地点搜索，失败则用本地深港地点库。 */
+async function searchPlaces(q) {
+  const key = String(q || '').trim();
+  if (!key) return LOCAL_PLACES.slice(0, 8);
+  try {
+    const remote = await searchAmap(key);
+    if (remote && remote.length) return remote;
+  } catch (err) {}
+  return searchLocal(key);
+}
+
+/** 当前位置反查。没有高德结果时返回演示地址，方便静态页走通。 */
+async function reverseGeocode(lng, lat) {
+  const fallback = { name: '当前位置（演示）', addr: '深圳市福田区福华一路', cat: 'SZ_CITY', loc: '' };
+  if (lng == null || lat == null || !CONFIG.amapKey) return fallback;
+  try {
+    const url = 'https://restapi.amap.com/v3/geocode/regeo?key=' + encodeURIComponent(CONFIG.amapKey) +
+      '&location=' + lng + ',' + lat + '&extensions=base';
+    const j = await (await fetch(url)).json();
+    const addr = j && j.regeocode && j.regeocode.formatted_address;
+    if (j && j.status === '1' && addr) {
+      const name = (j.regeocode.pois && j.regeocode.pois[0] && j.regeocode.pois[0].name) || '当前位置';
+      return { name: name, addr: addr, cat: guessArea({ name: name, addr: addr }), loc: lng + ',' + lat };
+    }
+  } catch (err) {}
+  fallback.loc = lng + ',' + lat;
+  return fallback;
+}
+
+function hkToday() {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  } catch (err) {
+    return ymd(new Date());
+  }
+}
+function hkNextHalfHour() {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Hong_Kong', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+    const h = Number((parts.find((p) => p.type === 'hour') || {}).value || 8);
+    const m = Number((parts.find((p) => p.type === 'minute') || {}).value || 0);
+    let total = h * 60 + m;
+    const rem = total % 30;
+    total += rem === 0 ? 30 : (30 - rem);
+    if (total >= 24 * 60) total = 23 * 60 + 30;
+    return String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
+  } catch (err) {
+    return '08:00';
   }
 }
 
@@ -1966,21 +2025,66 @@ function orderCard(o) {
   </div>`;
 }
 
+function nowPlaceField() {
+  const p = S.now.fromPlace;
+  if (p && p.name) {
+    return `<button class="place-tap" data-act="open-amap" type="button">
+      <b>${esc(p.name)}</b>
+      <small>${esc(p.addr || '')}</small>
+      <small>重选 · 高德选点</small>
+    </button>`;
+  }
+  return `<button class="place-tap" data-act="open-amap" type="button"><span class="ph">高德选点 · 搜索出发地</span></button>`;
+}
 function viewNow() {
-  const phone = (lastPax().phone || '');
+  const phone = S.now.phone || lastPax().phone || '';
+  const date = S.now.date || hkToday();
+  const time = S.now.time || hkNextHalfHour();
   return `<div class="view">
     <div class="step-head">
       <h2>立即用车</h2>
       <p>登记用车意向。工作人员确认车辆和时间后再安排。余位与车辆以确认结果为准。</p>
     </div>
-    <label class="field"><span>出发地（选填）</span><input id="nowFrom" maxlength="40" placeholder="例如：福田口岸"></label>
+    <div class="field"><span>出发地</span>${nowPlaceField()}</div>
     <label class="field"><span>目的地区域</span>
       <select id="nowDest">${districtOptions(S.now.dest)}</select>
     </label>
-    <label class="field"><span>希望出发时间</span><input id="nowWhen" maxlength="40" placeholder="例如：今天 18:30，或写「请客服确认」"></label>
+    <label class="field"><span>用车日期</span>
+      <input type="date" id="nowDate" min="${hkToday()}" value="${esc(date)}">
+    </label>
+    <label class="field"><span>希望出发时间</span>
+      <input type="time" id="nowTime" step="1800" value="${esc(time)}">
+    </label>
+    <div class="muted">出发时间可点选。最终以客服确认为准。</div>
     <label class="field"><span>联系电话</span><input id="nowPhone" inputmode="tel" maxlength="20" placeholder="方便客服回你" value="${esc(phone)}"></label>
     <button class="btn primary block" data-act="now-submit">提交用车意向</button>
     <div class="reminder">提交后会生成意向号。工作人员确认前，行程都还没定下来。</div>
+  </div>`;
+}
+function amapListHTML() {
+  const list = S.amapResults || [];
+  if (S.amapSearching) return '<div class="muted" style="padding:10px">正在从高德搜索…</div>';
+  if (!list.length) return '<div class="muted" style="padding:10px">没找到，换个关键词试试。</div>';
+  return list.map((p, i) => `
+    <button class="result" data-act="amap-pick" data-val="${i}">
+      <span><b>${esc(p.name)}</b><small>${esc(p.addr || '')}</small></span>
+      <span class="area">${AREA_LABEL[p.cat] || '地点'}</span>
+    </button>`).join('');
+}
+function amapSheet() {
+  if (S.sheet !== 'amap') return '';
+  return `
+  <div class="mask" data-act="close-sheet"></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="高德选点">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">高德选点 <button class="link" data-act="close-sheet" style="float:right;font-size:12px">关闭</button></div>
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="amapSearch" autocomplete="off" placeholder="搜索机场、口岸、商场、酒店" value="${esc(S.amapQ || '')}">
+    </div>
+    <button class="btn ghost block" data-act="amap-geo" style="margin-top:10px">使用当前位置</button>
+    <div class="sheet-body" id="amapList" style="margin-top:10px">${amapListHTML()}</div>
+    <div class="amap-foot">地点数据来自高德地图</div>
   </div>`;
 }
 
@@ -2233,7 +2337,7 @@ function render() {
   else if (S.view === 'done') main.innerHTML = successView();
   else main.innerHTML = viewHome();
   const sheetHost = $('#sheet');
-  if (sheetHost) sheetHost.innerHTML = sheetView() + zoomView();
+  if (sheetHost) sheetHost.innerHTML = sheetView() + amapSheet() + zoomView();
   main.scrollTop = keepScroll;
   render.last = S.view;
   render.step = S.step;
@@ -2305,17 +2409,23 @@ function submitCharter() {
 }
 
 function submitNowIntent() {
-  const from = (($('#nowFrom') || {}).value || '').trim();
+  const place = S.now.fromPlace;
   const dest = (($('#nowDest') || {}).value || S.now.dest || '');
-  const when = (($('#nowWhen') || {}).value || '').trim() || '请客服确认时间';
+  const date = (($('#nowDate') || {}).value || '').trim();
+  const time = (($('#nowTime') || {}).value || '').trim();
   const phone = (($('#nowPhone') || {}).value || '').trim();
+  if (!place || !place.name) return toast('请用高德选点选择出发地');
+  if (!date) return toast('请选择用车日期');
+  if (date < hkToday()) return toast('用车日期不能早于今天');
+  if (!time) return toast('请选择出发时间');
   const digits = phone.replace(/\D/g, '');
   if (digits.length < 8 || digits.length > 15) return toast('请填写联系电话，方便客服回你');
   const order = {
     id: newOrderId('YX'), type: '立即用车',
-    origin: from || '待沟通',
+    origin: place.name,
+    originAddr: place.addr || '',
     destination: districtLabel(dest) || dest || '待沟通',
-    when: when, phone: phone.replace(/\s+/g, ''), pax: 1, price: null,
+    when: date + ' ' + time, phone: phone.replace(/\s+/g, ''), pax: 1, price: null,
     stage: 0, status: '已登记', paidDeclared: false, personalWechat: '',
     createdAt: new Date().toISOString()
   };
@@ -2605,7 +2715,57 @@ document.addEventListener('click', (e) => {
   if (act === 'copy-order') return copy(val);
   if (act === 'call') { location.href = 'tel:' + CONFIG.contact.phone; return; }
   if (act === 'paytab') { S.payTab = val; render(); return; }
-  if (act === 'now-open') { S.now = { dest: 'HK_YTM', status: 'idle', result: null }; S.view = 'now'; render(); return; }
+  if (act === 'now-open') {
+    S.now = { dest: 'HK_YTM', status: 'idle', result: null, fromPlace: null, date: hkToday(), time: hkNextHalfHour(), phone: '' };
+    S.view = 'now';
+    render();
+    return;
+  }
+  if (act === 'open-amap') {
+    const phone = document.getElementById('nowPhone');
+    const date = document.getElementById('nowDate');
+    const time = document.getElementById('nowTime');
+    const dest = document.getElementById('nowDest');
+    if (phone) S.now.phone = phone.value;
+    if (date && date.value) S.now.date = date.value;
+    if (time && time.value) S.now.time = time.value;
+    if (dest) S.now.dest = dest.value;
+    S.sheet = 'amap';
+    S.amapQ = '';
+    S.amapSearching = false;
+    S.amapResults = LOCAL_PLACES.slice(0, 8);
+    render();
+    return;
+  }
+  if (act === 'amap-pick') {
+    const place = (S.amapResults || [])[Number(val)];
+    if (!place) return;
+    S.now.fromPlace = { name: place.name, addr: place.addr || '', cat: place.cat || guessArea(place), loc: place.loc || '' };
+    S.sheet = null;
+    render();
+    return;
+  }
+  if (act === 'amap-geo') {
+    const apply = (place, note) => {
+      S.now.fromPlace = place;
+      S.sheet = null;
+      render();
+      if (note) toast(note);
+    };
+    if (!navigator.geolocation) {
+      apply({ name: '当前位置（演示）', addr: '深圳市福田区福华一路', cat: 'SZ_CITY', loc: '' }, '未拿到定位，已填入演示地址');
+      return;
+    }
+    toast('正在定位…');
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const place = await reverseGeocode(pos.coords.longitude, pos.coords.latitude);
+      const note = place.name.indexOf('演示') >= 0 ? '高德未返回地址，已填入演示位置' : '';
+      apply(place, note);
+    }, async () => {
+      apply({ name: '当前位置（演示）', addr: '深圳市福田区福华一路', cat: 'SZ_CITY', loc: '' }, '定位未允许，已填入演示地址');
+    }, { timeout: 8000 });
+    return;
+  }
   if (act === 'now-back') { S.view = 'home'; render(); return; }
   if (act === 'now-submit') { submitNowIntent(); return; }
   if (act === 'now-go' || act === 'now-pay') { toast('请先提交用车意向，由客服确认后再安排'); return; }
@@ -2834,6 +2994,31 @@ document.addEventListener('change', (e) => {
 });
 
 document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'amapSearch') {
+    const q = e.target.value;
+    S.amapQ = q;
+    clearTimeout(searchTimer);
+    const box = document.getElementById('amapList');
+    if (!q.trim()) {
+      S.amapSearching = false;
+      S.amapResults = LOCAL_PLACES.slice(0, 8);
+      if (box) box.innerHTML = amapListHTML();
+      return;
+    }
+    S.amapSearching = true;
+    S.amapResults = [];
+    if (box) box.innerHTML = amapListHTML();
+    const seq = ++searchSeq;
+    searchTimer = setTimeout(async () => {
+      const results = await searchPlaces(q);
+      if (seq !== searchSeq) return;
+      S.amapSearching = false;
+      S.amapResults = results || [];
+      const live = document.getElementById('amapList');
+      if (live) live.innerHTML = amapListHTML();
+    }, 280);
+    return;
+  }
   if (!e.target || !e.target.id || e.target.id.indexOf('placeSearch-') !== 0) return;
   const kind = e.target.id.slice('placeSearch-'.length);
   const q = e.target.value;
