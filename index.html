@@ -4,9 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>方行深港 FONGGO · 工作日通勤班车 / 深港点对点包车</title>
-<meta name="description" content="方行深港 FONGGO：工作日通勤班车（福田站12号出口 7:45 集合 → 香港IFC）与深港点对点跨境包车。7座埃尔法，每车限载5人，余位与票价实时可查。" />
-<meta property="og:title" content="方行深港 FONGGO · 深港通勤 & 跨境包车" />
-<meta property="og:description" content="工作日福田 → 香港IFC 通勤班车，余位与票价一目了然；深港点对点包车一口价，地点可搜索。" />
+<meta name="description" content="方行深港 FONGGO：通勤班车与包车接送，均为预约登记、人工确认。你的下一程，也是我的下一程。余位与车辆以客服确认结果为准。" />
+<meta property="og:title" content="方行深港 FONGGO · 预约登记" />
+<meta property="og:description" content="通勤班车与包车接送同等入口。提交意向后由客服确认，余位与车辆以确认结果为准。" />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="https://haozefangaaron-oss.github.io/fangxing-sg/share-cover.png" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -607,6 +607,106 @@
   .links button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; border: 0; background: none; padding: 13px 2px; border-bottom: 1px solid var(--line-2); cursor: pointer; text-align: left; }
   .links span { font-size: 13.5px; color: var(--ink-2); letter-spacing: .02em; }
   .links b { font-size: 11.5px; font-weight: 400; color: var(--muted); }
+
+  /* 班车 / 包车同等入口 */
+  .hero h1 { position: relative; z-index: 1; color: var(--hero-ink); font-size: 22px; font-weight: 650; margin: 12px 0 8px; letter-spacing: -.02em; line-height: 1.35; }
+  .hero .hero-lead { position: relative; z-index: 1; margin: 0; color: rgba(246,242,233,.74); font-size: 12.5px; line-height: 1.6; }
+  .peers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .peer {
+    min-height: 198px; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+    padding: 14px 13px 12px; border-radius: 20px; cursor: pointer; border: 1px solid transparent;
+  }
+  .peer.navy {
+    background: linear-gradient(168deg, var(--hero-1), var(--hero-2));
+    color: var(--hero-ink);
+    box-shadow: 0 16px 34px -24px rgba(18,30,44,.7);
+  }
+  .peer.gold {
+    background: linear-gradient(165deg, #f8f1e2, #e6d2aa);
+    color: #3a2b10;
+    border-color: rgba(138,101,41,.28);
+    box-shadow: 0 16px 34px -24px rgba(133,97,40,.55);
+  }
+  .peer-kicker { font-size: 10.5px; letter-spacing: .14em; opacity: .72; }
+  .peer-title { margin-top: 8px; font-size: 16px; font-weight: 700; letter-spacing: -.02em; line-height: 1.35; }
+  .peer-sub { margin-top: 6px; font-size: 11.5px; line-height: 1.5; opacity: .8; }
+  .peer-foot { margin-top: auto; padding-top: 12px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .peer-foot b { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .peer-foot em { font-style: normal; font-size: 10px; opacity: .66; margin-left: 2px; }
+  .peer-cta { flex: 0 0 auto; font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 5px 8px; letter-spacing: .02em; }
+  .peer.navy .peer-cta { background: var(--hero-ink); color: var(--brand); }
+  .peer.gold .peer-cta { background: #1d3348; color: #f6f2e9; }
+  .consult {
+    width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
+    padding: 12px 2px 2px; border: 0; border-top: 1px solid var(--line); background: none; cursor: pointer;
+  }
+  .consult b { display: block; font-size: 13.5px; font-weight: 650; }
+  .consult small { display: block; margin-top: 3px; color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+  .consult i { color: #b5afa3; font-style: normal; font-size: 18px; }
+
+  /* 履约进度 */
+  .fulfill, .wecom, .demo-box { border-radius: 18px; }
+  .fulfill { background: var(--card); border: 1px solid var(--line); padding: 14px; box-shadow: var(--shadow); }
+  .fulfill-list { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; }
+  .fulfill-list li { position: relative; padding: 0 0 14px 18px; color: var(--muted); }
+  .fulfill-list li:last-child { padding-bottom: 0; }
+  .fulfill-list li::before {
+    content: ""; position: absolute; left: 3px; top: 10px; bottom: -2px; width: 2px; background: rgba(25,24,21,.12);
+  }
+  .fulfill-list li:last-child::before { display: none; }
+  .fulfill-list li i {
+    position: absolute; left: 0; top: 4px; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--card); border: 2px solid #c8c2b6; box-sizing: border-box;
+  }
+  .fulfill-list li.is-done { color: var(--ink-2); }
+  .fulfill-list li.is-done i { background: var(--brand); border-color: var(--brand); }
+  .fulfill-list li.is-done::before { background: rgba(26,44,63,.45); }
+  .fulfill-list li.is-now { color: var(--ink); }
+  .fulfill-list li.is-now i { background: #c8a86e; border-color: #856128; box-shadow: 0 0 0 3px rgba(200,168,110,.28); }
+  .fulfill-list li b { font-size: 13.5px; font-weight: 650; }
+  .fulfill-list li small { margin-left: 6px; font-size: 11px; color: var(--gold); font-weight: 650; }
+  .fulfill-note {
+    margin: 10px 0 4px; padding: 8px 10px; border-radius: 10px;
+    background: var(--gold-soft); color: #6d5424; font-size: 13px; font-weight: 650;
+  }
+  .demo-box { border: 1px dashed rgba(138,101,41,.5); background: #fbf7ee; padding: 12px; }
+  .demo-flag {
+    display: inline-block; font-size: 10px; letter-spacing: .16em; color: #6d5424;
+    border: 1px solid rgba(138,101,41,.45); border-radius: 999px; padding: 1px 7px; margin-bottom: 6px;
+  }
+  .demo-box p { margin: 0 0 8px; font-size: 12px; color: #6d5424; line-height: 1.55; }
+  .demo-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .demo-acts button {
+    border: 1px dashed rgba(138,101,41,.5); background: #fffdf8; color: #6d5424;
+    border-radius: 999px; padding: 7px 10px; font-size: 12px; cursor: pointer;
+  }
+  .demo-acts button.on { background: #e9d5ae; font-weight: 700; border-style: solid; }
+  .demo-acts button[disabled] { opacity: 1; cursor: default; }
+  .wecom {
+    background: var(--card); border: 1px solid var(--line); padding: 14px;
+    box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px;
+  }
+  .wecom .btn { height: auto; min-height: 46px; padding-top: 10px; padding-bottom: 10px; white-space: normal; line-height: 1.35; text-align: center; }
+  .wecom-row { display: flex; align-items: center; gap: 12px; }
+  .wecom-row > div:first-child { flex: 1 1 auto; min-width: 0; }
+  .wecom-row b { font-size: 14px; font-weight: 650; }
+  .wecom-row small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+  .wecom-qr {
+    width: 92px; height: 92px; flex: 0 0 auto; border-radius: 12px;
+    border: 1px dashed rgba(138,101,41,.5);
+    background: repeating-linear-gradient(45deg, #fbf7ee, #fbf7ee 6px, #f3ead8 6px, #f3ead8 12px);
+    display: grid; place-items: center; overflow: hidden;
+  }
+  .wecom-qr img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+  .wecom-qr .ph { display: none; text-align: center; font-size: 10px; color: #6d5424; line-height: 1.45; padding: 6px; }
+  .wecom-qr.missing .ph { display: block; }
+  .wecom-qr.missing img { display: none; }
+  .intent-kicker { margin-top: 12px; font-size: 11px; letter-spacing: .2em; color: var(--muted); }
+  .intent-warn { margin: 8px auto 0; max-width: 28em; font-size: 13px; color: #6d5424; line-height: 1.6; }
+  @media (max-width: 360px) {
+    .peers { grid-template-columns: 1fr; }
+    .peer { min-height: 0; }
+  }
 </style>
 </head>
 <body>
@@ -625,7 +725,9 @@ const GROUP_QR = '';
 const BRAND = { zh: '方行深港', en: 'FONGGO', tag: '深港通勤 · 点对点包车' };
 
 const CONFIG = {
-  contact: { wechat: '13930365066', phone: '13930365066', note: '微信同号，添加时请备注「深港」' },
+  contact: { wechat: '13930365066', phone: '13930365066', note: '电话可直接拨打。建群请优先加企微客服，不必先留个人微信。' },
+  /* 企微「联系我」二维码：把图片放到同目录后把文件名填进来。留空则显示占位。 */
+  wecom: { qr: '', name: '方行深港企微客服' },
   /* 收款码图片：把微信/支付宝收款码截图命名为下面两个文件名，放在 index.html 同目录 */
   pay: { wechat: 'pay-wechat.png', alipay: 'pay-alipay.png' },
   /* 高德 Web 服务 Key（免费申请）：留空则用内置地点库 + 手动填写 */
@@ -871,6 +973,7 @@ const S = {
   sheet: null, agreed: false, zoom: null,
   pq: { from: 'SZ_CITY', to: 'HK_KOWLOON' },
   now: { dest: 'HK_KOWLOON', status: 'idle', result: null },
+  showWxId: false,
   payAvail: { wechat: false, alipay: false }
 };
 const ORDER_KEY = 'fx_orders_v3';
@@ -962,9 +1065,135 @@ function copy(text) {
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const priceText = (n) => (n == null ? '待人工报价' : '¥' + n);
 
+/* 客户可见履约进度。付款已确认只能由演示里的「客服」按钮推进，客户声明不会跨过这一步。 */
+const FULFILL_STAGES = ['已登记', '待确认付款', '付款已确认', '车辆/司机已安排', '行程中', '已完成'];
+function stageOf(order) {
+  if (!order) return 0;
+  if (typeof order.stage === 'number' && order.stage >= 0 && order.stage < FULFILL_STAGES.length) return order.stage;
+  if (order.status === '已付款待核对') return 1;
+  if (order.status === '已确认') return 3;
+  if (order.status === '已完成') return 5;
+  return 0;
+}
+function rememberOrder(order) {
+  if (S.order && order && S.order.id === order.id) S.order = order;
+  return order;
+}
+function setStage(order, stage) {
+  const next = Math.max(0, Math.min(FULFILL_STAGES.length - 1, stage));
+  const list = updateOrder(order.id, { stage: next, status: FULFILL_STAGES[next] });
+  return rememberOrder(list.find((o) => o.id === order.id) || Object.assign({}, order, { stage: next, status: FULFILL_STAGES[next] }));
+}
+function savedWx(order) {
+  if (order && order.personalWechat) return order.personalWechat;
+  try { return localStorage.getItem('fx_personal_wx') || ''; } catch (e) { return ''; }
+}
+function fulfillTimeline(order) {
+  const idx = stageOf(order);
+  const items = FULFILL_STAGES.map((label, i) => {
+    const cls = i < idx ? 'is-done' : (i === idx ? 'is-now' : '');
+    return `<li class="${cls}"><i></i><div><b>${label}</b>${i === idx ? '<small>当前</small>' : ''}</div></li>`;
+  }).join('');
+  const arranged = idx >= 3 ? '<div class="fulfill-note">工作人员已确认安排</div>' : '';
+  return `<section class="fulfill" id="fulfill">
+    <div class="block-head"><h2>履约进度</h2><span class="pill brand">${FULFILL_STAGES[idx]}</span></div>
+    <ol class="fulfill-list">${items}</ol>
+    ${arranged}
+    <p class="muted" style="margin-top:8px">进度以客服更新为准。</p>
+  </section>`;
+}
+function demoControls(order) {
+  const idx = stageOf(order);
+  const btns = [
+    [1, '模拟待确认付款'],
+    [2, '模拟客服确认付款'],
+    [3, '模拟司机已安排'],
+    [4, '模拟行程中'],
+    [5, '模拟已完成']
+  ];
+  return `<section class="demo-box" aria-label="演示进度">
+    <div class="demo-flag">演示</div>
+    <p>下面的按钮只在这台手机上切换展示进度，方便走查。不会真实确认到账，也不会安排车辆。</p>
+    <p>当前：${FULFILL_STAGES[idx]}${idx >= 3 ? ' · 工作人员已确认安排' : ''}。进度以客服更新为准。</p>
+    <div class="demo-acts">
+      ${btns.map(([n, label]) => `<button class="${idx === n ? 'on' : ''}" data-act="demo-stage" data-val="${n}" ${idx === n ? 'disabled' : ''}>${label}</button>`).join('')}
+      <button data-act="demo-stage" data-val="0" ${idx === 0 ? 'disabled' : ''}>重置为已登记</button>
+    </div>
+  </section>`;
+}
+function wecomBlock(order) {
+  const qr = (CONFIG.wecom && CONFIG.wecom.qr) || '';
+  const saved = savedWx(order);
+  const showForm = !!(S.showWxId || saved);
+  const qrHtml = `<div class="wecom-qr${qr ? '' : ' missing'}">${qr ? `<img src="${esc(qr)}" alt="企微联系我二维码" onerror="this.parentNode.classList.add('missing')">` : ''}<div class="ph">企微「联系我」码<br>占位 · 待替换</div></div>`;
+  return `<section class="wecom">
+    <div class="block-head"><h2>履约沟通</h2><span class="pill gold">企微优先</span></div>
+    <p class="muted">先添加企微客服。工作人员确认意向后，可能在欢迎消息里发送收款码，并按需要建沟通群。</p>
+    <div class="wecom-row">
+      <div>
+        <b>添加企微客服</b>
+        <small>推荐。方便建沟通群。</small>
+      </div>
+      ${qrHtml}
+    </div>
+    <button class="btn primary block" data-act="wecom-add">添加企微客服（推荐，便于建沟通群）</button>
+    <button class="btn ghost block" data-act="toggle-wxid">${showForm ? '收起微信号' : '填写微信号（仅个微群需要，选填）'}</button>
+    ${showForm ? `<label class="field"><span>微信号（选填，仅个微群需要）</span>
+        <input id="personalWx" maxlength="30" placeholder="客服说明要建个人微信群时再填" value="${esc(saved)}">
+      </label>
+      <button class="btn ghost block small" data-act="save-wxid">保存微信号</button>` : ''}
+  </section>`;
+}
+function orderSummary(o) {
+  let rows;
+  if (o.type === '通勤班车') {
+    rows = [['意向号', o.id], ['行程', `${o.direction} · ${o.date}`], ['座位', o.seat || ''], ['乘车人', `${o.name || ''} · ${o.phone || ''}`]];
+    if (o.dropoffAddr) rows.push(['送达', `${o.dropoff} · ${o.dropoffAddr}`]);
+    else if (o.dropoff) rows.push(['送达', o.dropoff]);
+  } else if (o.type === '用车咨询') {
+    rows = [['意向号', o.id], ['行程', `${o.origin || ''} → ${o.destination || ''}`], ['希望时间', o.when || ''], ['电话', o.phone || '']];
+  } else {
+    rows = [['意向号', o.id], ['行程', `${o.origin || ''} → ${o.destination || ''}`], ['时间', o.when || ''], ['人数', `${o.pax || 1} 人`]];
+  }
+  return `<div class="summary">
+    <div class="summary-head">${esc(o.type)} · 意向单</div>
+    <dl>${rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>
+    ${o.price == null ? '<div class="total"><span>价格</span><b>待客服报价</b></div>' : `<div class="total"><span>参考金额</span><b>¥${o.price}</b></div>`}
+  </div>`;
+}
+function payDeclareBlock(o) {
+  if (stageOf(o) >= 2) {
+    return `<section class="block">
+      <div class="block-head"><h2>付款</h2><span class="pill ok">付款已确认</span></div>
+      <p class="muted">这一步表示工作人员已核对。客户点的「我已付款」只是声明，不会自动变成付款已确认。</p>
+    </section>`;
+  }
+  return `<section class="block">
+    <div class="block-head"><h2>付款声明</h2></div>
+    <p class="muted">车费不在本页支付。工作人员确认后，可能在企微欢迎消息里发送收款码。你按指引付完，可以在这里告诉客服。</p>
+    ${o.paidDeclared ? '<div class="reminder">已记下「我已付款」。这是你的声明，不是「付款已确认」。</div>' : ''}
+    <button class="btn ghost block" data-act="mark-paid">我已付款</button>
+  </section>`;
+}
+
 /* chrome */
 function renderTop() {
   const top = $('#top');
+  if (S.view === 'order' || S.view === 'now') {
+    const title = S.view === 'order' ? '预约详情' : '咨询用车安排';
+    const backAct = S.view === 'order' ? 'order-back' : 'now-back';
+    top.style.setProperty('--tint', 0);
+    top.innerHTML = `
+      <div class="flow-top">
+        <button class="back" data-act="${backAct}" aria-label="返回">‹</button>
+        <div>
+          <div class="flow-title">${title}</div>
+          <div class="flow-step">预约登记 · 人工确认</div>
+        </div>
+      </div>
+      <a class="icon-btn" href="tel:${CONFIG.contact.phone}">客服</a>`;
+    return;
+  }
   if (S.view === 'bus' || S.view === 'charter') {
     const title = S.view === 'bus' ? '工作日通勤班车' : '深港跨境包车';
     const steps = currentSteps();
@@ -1041,70 +1270,59 @@ function viewHome() {
   const nextKey = next ? ymd(next) : '';
   const nextLeft = next ? seatsLeft(availability(nextKey, '去程')) : 0;
   const soldOut = !!next && nextLeft === 0;
-  const firstOk = upcoming(10).find((d) => bookable(d) && seatsLeft(availability(ymd(d), '去程')) > 0);
-  const status = !next ? '暂停发车'
-    : soldOut ? (firstOk ? `${firstOk.getMonth() + 1}/${firstOk.getDate()} 起可约` : '近期已满')
-    : '余 ' + nextLeft + ' 座';
   return `
   <div class="view home">
     <section class="hero">
-      <div class="hero-top">
-        <span class="hero-kicker">深港通勤 · 周一至周五</span>
-        <span class="hero-live ${next && !soldOut ? '' : 'is-out'}"><i></i>${status}</span>
-      </div>
-      <div class="hero-clock">07:45</div>
-      <div class="hero-note">福田站 12 号出口集合，07:50 准时发车</div>
-      <div class="hero-route">
-        <div class="pt"><b>福田站</b><span>12 号出口</span></div>
-        <div class="rl"></div>
-        <div class="pt r"><b>香港 IFC 二期</b><span>落客区</span></div>
-      </div>
-      <div class="hero-foot">
-        <div class="hero-price"><span>单程</span><b><i>¥</i>108</b><em>起</em></div>
-        <button class="hero-btn" data-act="go" data-val="bus">预约班车</button>
-      </div>
+      <div class="hero-kicker">方行深港 · FONGGO</div>
+      <h1>你的下一程，也是我的下一程。</h1>
+      <p class="hero-lead">预约登记，人工确认。通勤班车与包车接送可以一起看，余位和车辆都等客服回你。</p>
+    </section>
+
+    <section class="peers" aria-label="预约入口">
+      <button class="peer navy" data-act="go" data-val="bus">
+        <span class="peer-kicker">通勤班车</span>
+        <span class="peer-title">福田 → 香港 IFC</span>
+        <span class="peer-sub">工作日 07:45 集合<br>登记班车意向</span>
+        <span class="peer-foot"><span><b>¥108</b><em>起</em></span><span class="peer-cta">登记意向</span></span>
+      </button>
+      <button class="peer gold" data-act="go" data-val="charter">
+        <span class="peer-kicker">包车 / 接送</span>
+        <span class="peer-title">深港点对点</span>
+        <span class="peer-sub">时间与线路人工确认<br>登记包车意向</span>
+        <span class="peer-foot"><span><b>¥500</b><em>起</em></span><span class="peer-cta">登记意向</span></span>
+      </button>
     </section>
 
     <section class="spec">
-      <div class="spec-cell"><b>5</b><span>每车定员</span></div>
-      <div class="spec-cell"><b>18:40</b><span>返程发车</span></div>
-      <div class="spec-cell"><b>20:00</b><span>报名截止</span></div>
+      <div class="spec-cell"><b>登记</b><span>先提交意向</span></div>
+      <div class="spec-cell"><b>确认</b><span>客服回你</span></div>
+      <div class="spec-cell"><b>企微</b><span>再沟通行程</span></div>
     </section>
 
     <div>
       <button class="fold2 ${S.showTrips ? 'open' : ''}" data-act="toggle-trips">
-        <span>近期班次</span>
-        <span class="fold2-go">${next ? `${next.getMonth() + 1}/${next.getDate()} · ${soldOut ? '已满' : '余 ' + nextLeft + ' 座'}` : '暂无'} <i class="chev">›</i></span>
+        <span>近期班次（参考）</span>
+        <span class="fold2-go">${next ? `${next.getMonth() + 1}/${next.getDate()} · ${soldOut ? '参考已满' : '参考余 ' + nextLeft + ' 座'}` : '暂无'} <i class="chev">›</i></span>
       </button>
-      ${S.showTrips ? `<div class="fold-body">${tripRows(4)}</div>` : ''}
+      ${S.showTrips ? `<div class="fold-body">${tripRows(4)}<div class="muted" style="padding:4px 2px 8px">页面上的余位只是参考，以客服确认结果为准。</div></div>` : ''}
     </div>
 
-    <section class="svc">
-      <button class="svc-row" data-act="go" data-val="charter">
-        <span class="svc-main"><b>深港跨境包车</b><small>点对点 · 24 小时 · 地点可搜索</small></span>
-        <span class="svc-right"><em>一口价</em><b>¥500</b><em>起</em><i class="chev">›</i></span>
-      </button>
-      <button class="svc-row" data-act="now-open">
-        <span class="svc-main"><b>现在用车</b><small>30 分钟内能到 · 直接派车</small></span>
-        <span class="svc-right"><i class="chev">›</i></span>
-      </button>
-    </section>
+    <button class="consult" data-act="now-open">
+      <span>
+        <b>现在用车 · 咨询安排</b>
+        <small>登记用车意向，由客服确认车辆和时间。</small>
+      </span>
+      <i>›</i>
+    </button>
 
-    <section class="wx">
-      <div>
-        <b>加入微信群</b>
-        <small>余位提醒、临时放位、拼车信息，第一时间发在群里。</small>
-        <button class="link2" data-act="copy-wx">复制客服微信</button>
-      </div>
-      ${GROUP_QR ? `<div class="wx-qr"><img src="${GROUP_QR}" alt="微信群二维码" onerror="this.parentNode.classList.add('missing')"><div class="ph">群二维码<br>待上传</div></div>` : ''}
-    </section>
+    ${wecomBlock(null)}
 
     <div class="links">
       <button data-act="tab" data-val="price"><span>价目与规则</span><b>票价 · 包车报价 · 退改</b></button>
-      <button data-act="tab" data-val="me"><span>我的预约</span><b>查看记录与客服</b></button>
+      <button data-act="tab" data-val="me"><span>我的预约</span><b>意向号与履约进度</b></button>
     </div>
 
-    <div class="fine">本页为预约登记工具，不代办港澳通行证、不审核签注；通关耗时受口岸排队影响，恕不承诺过关时长。</div>
+    <div class="fine">本页为预约登记工具，不代办港澳通行证、不审核签注；通关耗时受口岸排队影响，恕不承诺过关时长。你的下一程，也是我的下一程。</div>
   </div>`;
 }
 /* bus */
@@ -1121,18 +1339,18 @@ function currentSteps() { return S.view === 'bus' ? busSteps() : charterSteps();
 const BUS_TITLE = {
   direction: ['选择方向', '去程：福田 → 香港IFC；返程：IFC → 深圳'],
   date: ['选择日期', '仅周一至周五工作日运行，前一日 20:00 截止报名'],
-  seat: ['选择座位', '每车 5 座，满员即停止接单'],
+  seat: ['选择座位', '每车 5 座。页面余位仅供参考，以客服确认为准'],
   dropoff: ['选择送达点', '返程可送到口岸，或直接送到家门口'],
   home: ['送到家门口', '搜索小区、大厦或地标，也可以用当前位置'],
   info: ['乘车人信息', '司机与客服会用这个号码联系你'],
-  confirm: ['确认行程', '核对无误后提交，客服与你确认占位']
+  confirm: ['确认行程', '核对后提交意向。余位以客服确认为准'],
 };
 const CHARTER_TITLE = {
   origin: ['出发地', '搜索具体地点，或直接使用当前位置'],
   dest: ['目的地', '香港岛 / 九龙 / 深圳市区 / 机场'],
   time: ['用车时间', '请选择日期与具体时间'],
   detail: ['乘车信息', '人数、儿童座椅与行李'],
-  confirm: ['确认行程', '核对无误后提交，客服与你确认车辆']
+  confirm: ['确认行程', '核对后提交意向。车辆与时间以客服确认为准'],
 };
 
 function viewBus() {
@@ -1250,12 +1468,13 @@ function busBody(key) {
     rows.push(['座位', seat.name], ['乘车人', `${d.name} · ${d.phone}`]);
     return `
       <div class="summary">
-        <div class="summary-head">预约确认单</div>
+        <div class="summary-head">班车意向单</div>
         <dl>${rows.map((r) => `<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>
-        <div class="total"><span>应付金额</span><b>¥${seat.price}</b></div>
+        <div class="total"><span>参考金额</span><b>¥${seat.price}</b></div>
       </div>
       <div class="reminder">${REMINDER}</div>
-      <button class="btn primary block done-btn" data-act="bus-submit"><span class="lbl">确认预约</span><svg class="tick" viewBox="0 0 24 24"><path d="M5 12.6 9.8 17.4 19 7.2"/></svg></button>
+      <div class="muted">提交意向不等于锁座。余位与车辆以客服确认结果为准。</div>
+      <button class="btn primary block done-btn" data-act="bus-submit"><span class="lbl">提交意向</span><svg class="tick" viewBox="0 0 24 24"><path d="M5 12.6 9.8 17.4 19 7.2"/></svg></button>
       <button class="btn ghost block" data-act="back">返回修改</button>`;
   }
   return '';
@@ -1446,13 +1665,13 @@ function charterBody(key) {
     else if (S.tripEtaLoading) rows.push(['预计车程', '计算中…']);
     return `
       <div class="summary">
-        <div class="summary-head">包车确认单</div>
+        <div class="summary-head">包车意向单</div>
         <dl>${rows.map((r) => `<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>
         <div class="total"><span>${price == null ? '价格' : '一口价'}</span><b>${price == null ? '待人工报价' : '¥' + price}</b></div>
       </div>
-      <div class="muted">报价为基础一口价；隧道费、停车费、等候费、夜间附加费、节假日加价需人工客服核实。</div>
+      <div class="muted">报价为基础一口价；隧道费、停车费、等候费、夜间附加费、节假日加价需人工客服核实。提交意向不等于锁座，车辆与时间以客服确认为准。</div>
       <div class="reminder">${REMINDER}</div>
-      <button class="btn primary block done-btn" data-act="charter-submit"><span class="lbl">提交需求</span><svg class="tick" viewBox="0 0 24 24"><path d="M5 12.6 9.8 17.4 19 7.2"/></svg></button>
+      <button class="btn primary block done-btn" data-act="charter-submit"><span class="lbl">提交意向</span><svg class="tick" viewBox="0 0 24 24"><path d="M5 12.6 9.8 17.4 19 7.2"/></svg></button>
       <button class="btn ghost block" data-act="back">返回修改</button>`;
   }
   return '';
@@ -1466,7 +1685,7 @@ function payCards() {
   ];
   const tabs = all.filter((t) => S.payAvail[t.id]);
   if (!tabs.length) {
-    return '<div class="pay"><div class="qr-wrap"><div class="qr missing"><div class="qr-fallback">收款码准备中<br><small>请先联系客服付款<br>微信 ' + CONFIG.contact.wechat + '</small></div></div></div></div>';
+    return '<div class="pay"><div class="qr-wrap"><div class="qr missing"><div class="qr-fallback">收款码准备中<br><small>演示图未加载<br>请让客服在企微欢迎消息里发收款码</small></div></div></div></div>';
   }
   if (!tabs.some((t) => t.id === S.payTab)) S.payTab = tabs[0].id;
   const cur = tabs.find((t) => t.id === S.payTab) || tabs[0];
@@ -1488,7 +1707,7 @@ function payCards() {
     '<div class="qr-wrap">' +
       '<div class="qr" data-act="zoom-qr">' +
         '<img src="' + cur.src + '" alt="' + cur.label + '收款码">' +
-        '<div class="qr-fallback">收款码准备中<br><small>请先联系客服付款<br>微信 ' + CONFIG.contact.wechat + '</small></div>' +
+        '<div class="qr-fallback">收款码准备中<br><small>演示图未加载<br>请让客服在企微欢迎消息里发收款码</small></div>' +
         '<span class="qr-zoom">点击放大</span>' +
       '</div>' +
       '<div class="pay-tip">' + tip + '</div>' +
@@ -1502,13 +1721,13 @@ function pqResultHTML() {
   const price = zoneQuote(a, b);
   if (price == null) {
     return '<div class="muted" style="margin-top:10px">' + ZONE_LABEL[a] + ' → ' + ZONE_LABEL[b] + ' 需人工报价。</div>' +
-      '<div class="seg" style="margin-top:12px"><a class="btn ghost" href="tel:' + CONFIG.contact.phone + '" style="text-decoration:none">电话问价</a><button data-act="copy-wx">加微信问价</button></div>';
+      '<div class="seg" style="margin-top:12px"><a class="btn ghost" href="tel:' + CONFIG.contact.phone + '" style="text-decoration:none">电话问价</a><button data-act="wecom-add">添加企微问价</button></div>';
   }
   return '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:12px">' +
     '<div class="muted">' + ZONE_LABEL[a] + ' → ' + ZONE_LABEL[b] + '</div>' +
     '<div style="font-size:26px;font-weight:700;letter-spacing:.3px">¥' + price + '</div></div>' +
     '<div class="muted" style="font-size:11.5px;margin-top:4px">基础一口价；夜间、节假日、等候、隧道停车等另计，需人工确认。</div>' +
-    '<button class="btn gold block" style="margin-top:12px" data-act="pq-go">按这个价预约</button>';
+    '<button class="btn gold block" style="margin-top:12px" data-act="pq-go">按这个价登记意向</button>';
 }
 
 function viewPrice() {
@@ -1559,13 +1778,13 @@ function viewPrice() {
       <div class="muted">包车改期、取消、加停靠点，请提前联系客服确认车辆与费用，不适用班车的候补规则。</div>
       <div class="seg" style="margin-top:12px">
         <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">联系客服</a>
-        <button data-act="copy-wx">复制微信号</button>
+        <button data-act="wecom-add">添加企微客服</button>
       </div>
     </div>
 
     <div class="block">
-      <div class="block-head"><h2>支付方式</h2><span class="muted">扫码付款</span></div>
-      <div class="muted" style="margin-bottom:10px">${PAY_TEXT}</div>
+      <div class="block-head"><h2>支付方式</h2><span class="muted">客服发送收款码</span></div>
+      <div class="muted" style="margin-bottom:10px">${PAY_TEXT}。车费不在本页扣除。工作人员确认意向后，可能在企微欢迎消息里发送收款码。下面是演示用图。</div>
       ${payCards()}
     </div>
 
@@ -1576,12 +1795,14 @@ function viewPrice() {
 /* me */
 function orderCard(o) {
   const head = o.type === '通勤班车'
-    ? `${o.direction} · ${o.date.slice(5)} · ${o.seat}`
-    : `${o.origin} → ${o.destination}`;
+    ? `${o.direction || ''} · ${(o.date || '').slice(5)} · ${o.seat || ''}`
+    : `${o.origin || ''} → ${o.destination || ''}`;
   const isBus = o.type === '通勤班车';
+  const stageLabel = FULFILL_STAGES[stageOf(o)];
   return `<div class="rows" style="margin-top:10px">
-    <div class="row"><span class="sub">${esc(o.id)}</span><b>${esc(o.status)}</b></div>
+    <div class="row"><span class="sub">意向号 ${esc(o.id)}</span><b>${esc(stageLabel)}</b></div>
     <div class="row"><span>${esc(head)}</span><b>${priceText(o.price)}</b></div>
+    ${o.paidDeclared && stageOf(o) < 2 ? '<div class="row"><span class="sub">付款</span><b>你已声明付款，待客服确认</b></div>' : ''}
     ${isBus
       ? `<div class="row"><span class="sub">乘车人 ${esc(o.name || '')}</span><b>${esc(o.phone || '')}</b></div>` +
         (o.dropoff && o.dropoff !== '皇岗口岸'
@@ -1589,7 +1810,7 @@ function orderCard(o) {
           : '')
       : `<div class="row"><span class="sub">${esc(o.when || '')}</span><b>${o.pax || 1} 人</b></div>`}
     <div class="row" style="gap:10px">
-      ${o.price != null ? `<button class="link" data-act="open-pay" data-val="${esc(o.id)}">查看收款码</button>` : '<span class="sub">待客服报价</span>'}
+      <button class="link" data-act="open-order" data-val="${esc(o.id)}">履约进度</button>
       ${isBus
         ? `<button class="link" data-act="refund-info" data-val="${esc(o.id)}">退票 / 候补</button>`
         : `<button class="link" data-act="charter-change" data-val="${esc(o.id)}">改期 / 取消</button>`}
@@ -1598,48 +1819,21 @@ function orderCard(o) {
 }
 
 function viewNow() {
-  const st = S.now;
-  let body;
-  if (st.status === 'loading') {
-    body = '<div class="muted" style="padding:24px 0;text-align:center">正在定位并计算附近车辆…</div>';
-  } else if (st.status === 'done' && st.result) {
-    const r = st.result;
-    if (r.kind === 'owner') {
-      body = '<div class="result-card ok"><div class="pill ok">已派车</div>' +
-        '<h3 style="margin:10px 0 4px">' + esc(r.car.name) + ' · ' + esc(r.car.plate || '') + '</h3>' +
-        '<div class="muted">预计 ' + (r.eta + (CONFIG.etaBuffer || 0)) + ' 分钟到（' + fmtClock(r.eta + (CONFIG.etaBuffer || 0)) + ' 左右）· 去 ' + ZONE_LABEL[st.dest] + '</div>' +
-        (r.price ? '<div style="margin-top:6px;font-size:20px;font-weight:700">¥' + r.price + ' <span class="muted" style="font-size:12px;font-weight:400">基础一口价</span></div>' : '') +
-        '<div class="muted" style="margin-top:8px">预约号 ' + esc(r.orderId) + '</div>' +
-        '<button class="btn primary block" style="margin-top:12px" data-act="now-pay">去付款</button></div>';
-    } else if (r.kind === 'pool') {
-      body = '<div class="result-card"><div class="pill">已发到抢单池</div>' +
-        '<h3 style="margin:10px 0 4px">正在联系附近司机</h3>' +
-        '<div class="muted">车主赶不到，已把单发到司机群。有人接单会第一时间联系你。</div>' +
-        (r.price ? '<div style="margin-top:6px;font-size:20px;font-weight:700">¥' + r.price + ' <span class="muted" style="font-size:12px;font-weight:400">参考价</span></div>' : '') +
-        '<div class="muted" style="margin-top:8px">预约号 ' + esc(r.orderId) + '</div>' +
-        '<button class="btn ghost block" style="margin-top:12px" data-act="copy-wx">加客服微信催一下</button></div>';
-    } else if (r.kind === 'nogeo') {
-      body = '<div class="result-card"><div class="pill warn">需要定位</div>' +
-        '<h3 style="margin:10px 0 4px">没有拿到你的位置</h3>' +
-        '<div class="muted">微信里第一次用会弹权限，请点「允许」。如果已经拒绝，去手机设置 → 微信 → 位置 → 打开，再回来重试。</div>' +
-        '<button class="btn primary block" style="margin-top:12px" data-act="now-go">重新定位</button></div>';
-    } else {
-      body = '<div class="result-card"><div class="pill warn">暂无车</div>' +
-        '<h3 style="margin:10px 0 4px">附近暂时没有车</h3>' +
-        '<div class="muted">可以先发布预约，司机看到会联系你。</div>' +
-        '<button class="btn primary block" style="margin-top:12px" data-act="go" data-val="charter">改为预约用车</button></div>';
-    }
-  } else {
-    body = '<div class="muted" style="margin-bottom:12px">需要先获取你的位置，才能算附近车多久到。位置只用于这次派车。</div>' +
-      '<label class="field"><span>目的地区域</span>' +
-      '<select id="nowDest" class="sel">' + ZONES.filter((z) => z.side === 'HK').map((z) => `<option value="${z.code}" ${st.dest === z.code ? 'selected' : ''}>${z.label}</option>`).join('') + '</select></label>' +
-      '<button class="btn primary block" style="margin-top:12px" data-act="now-go">获取位置并叫车</button>' +
-      '<div class="muted" style="margin-top:10px;font-size:11.5px">规则：车主自己的车 30 分钟内能到，优先派给他；超过 30 分钟自动发给其他司机抢单。</div>';
-  }
-  return '<div class="flow">' +
-    '<div class="flow-head"><button class="icon-btn" data-act="now-back">‹ 返回</button><span class="muted">立即用车</span></div>' +
-    body +
-    '</div>';
+  const phone = (lastPax().phone || '');
+  return `<div class="view">
+    <div class="step-head">
+      <h2>咨询用车安排</h2>
+      <p>登记用车意向。工作人员确认车辆和时间后再安排。余位与车辆以确认结果为准。</p>
+    </div>
+    <label class="field"><span>出发地（选填）</span><input id="nowFrom" maxlength="40" placeholder="例如：福田口岸"></label>
+    <label class="field"><span>目的地区域</span>
+      <select id="nowDest">${ZONES.map((z) => `<option value="${z.code}" ${S.now.dest === z.code ? 'selected' : ''}>${z.label}</option>`).join('')}</select>
+    </label>
+    <label class="field"><span>希望出发时间</span><input id="nowWhen" maxlength="40" placeholder="例如：今天 18:30，或写「请客服确认」"></label>
+    <label class="field"><span>联系电话</span><input id="nowPhone" inputmode="tel" maxlength="20" placeholder="方便客服回你" value="${esc(phone)}"></label>
+    <button class="btn primary block" data-act="now-submit">提交用车意向</button>
+    <div class="reminder">提交后会生成意向号。工作人员确认前，行程都还没定下来。</div>
+  </div>`;
 }
 
 function viewMe() {
@@ -1647,32 +1841,29 @@ function viewMe() {
   const list = orders.length ? orders.map(orderCard).join('')
     : `<div class="empty">
         <div class="empty-ico">◷</div>
-        <h3>还没有预约</h3>
-        <p>班车周一至周五 7:45 发车，包车 24 小时可约。<br>先挑一个班次，或者直接询价。</p>
+        <h3>还没有意向</h3>
+        <p>班车与包车都可以先登记。提交后由客服确认余位和车辆。</p>
         <div class="empty-act">
-          <button class="btn primary" data-act="go" data-val="bus">预约班车</button>
-          <button class="btn ghost" data-act="go" data-val="charter">包车询价</button>
+          <button class="btn primary" data-act="go" data-val="bus">登记班车</button>
+          <button class="btn ghost" data-act="go" data-val="charter">登记包车</button>
         </div>
       </div>`;
   return `
   <div class="view">
     <div class="block">
       <div class="block-head"><h2>我的预约</h2><span class="muted">${orders.length} 条</span></div>
-      <div class="muted">仅保存在本机浏览器，正式占位以客服确认为准。</div>
+      <div class="muted">只保存在本机浏览器。提交意向不等于锁座，余位与车辆以客服确认为准。点「履约进度」可以看时间轴。</div>
       ${list}
       ${orders.length ? '<button class="btn ghost block small" style="margin-top:12px" data-act="clear-orders">清除本机记录</button>' : ''}
     </div>
 
+    ${wecomBlock(null)}
     <div class="block">
-      <div class="block-head"><h2>联系客服</h2></div>
+      <div class="block-head"><h2>电话</h2></div>
       <div class="rows">
-        <div class="row"><span>客服微信</span><b>${CONFIG.contact.wechat}</b></div>
         <div class="row"><span>客服电话</span><b><a href="tel:${CONFIG.contact.phone}" style="color:inherit;text-decoration:none">${CONFIG.contact.phone}</a></b></div>
       </div>
-      <div class="seg" style="margin-top:12px">
-        <button data-act="call">一键拨号</button>
-        <button data-act="copy-wx">复制微信号</button>
-      </div>
+      <button class="btn ghost block" style="margin-top:12px" data-act="call">一键拨号</button>
       <div class="muted" style="margin-top:10px">${CONFIG.contact.note}</div>
     </div>
 
@@ -1760,115 +1951,52 @@ async function sbReq(path, opts) {
   return t ? JSON.parse(t) : null;
 }
 
-async function dispatchNow() {
-  S.now.status = 'loading';
-  render();
-  try {
-    const pos = await getPos();
-    let minutes = 30;
-    try {
-      const cfgRows = await sbReq('settings?key=eq.dispatch&select=value');
-      if (cfgRows && cfgRows[0] && cfgRows[0].value && cfgRows[0].value.priorityMinutes) minutes = Number(cfgRows[0].value.priorityMinutes);
-    } catch (e) {}
-    const pickupZone = await regeoZone(pos);
-    const price = pickupZone ? zoneQuote(pickupZone, S.now.dest) : null;
-    let cars = [];
-    try {
-      cars = await sbReq('car_status?online=eq.true&select=*&order=priority.desc') || [];
-    } catch (e) { cars = []; }
-    const now = Date.now();
-    cars = cars.filter((c) => c.lat && c.lng && (!c.busy_until || new Date(c.busy_until).getTime() < now));
-
-    let assigned = null;
-    for (const c of cars) {
-      if (!c.priority) continue;
-      const eta = await amapDrive(pos, { lat: c.lat, lng: c.lng });
-      if (eta != null && eta <= minutes) { assigned = { car: c, eta: eta }; break; }
-    }
-
-    const zone = S.now.dest;
-    if (assigned) {
-      const orderId = 'IS' + Date.now().toString(36).toUpperCase();
-      try {
-        await sbReq('orders', {
-          method: 'POST',
-          headers: { apikey: CONFIG.backend.key, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-          body: JSON.stringify({
-            id: orderId, type: '跨境包车', status: '待付款',
-            payload: { mode: 'instant', destArea: zone, car: assigned.car.name, plate: assigned.car.plate, eta: assigned.eta, pickup: pos, pickupZone: pickupZone, price: price, source: '立即用车' }
-          })
-        });
-        await sbReq('car_status?driver_id=eq.' + encodeURIComponent(assigned.car.driver_id), {
-          method: 'PATCH',
-          headers: { apikey: CONFIG.backend.key, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-          body: JSON.stringify({ busy_until: new Date(Date.now() + 90 * 60000).toISOString() })
-        });
-      } catch (e) {}
-      S.now.result = { kind: 'owner', car: assigned.car, eta: assigned.eta, orderId: orderId, price: price };
-    } else {
-      const orderId = 'IS' + Date.now().toString(36).toUpperCase();
-      try {
-        await sbReq('pool_orders', {
-          method: 'POST',
-          headers: { apikey: CONFIG.backend.key, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-          body: JSON.stringify({
-            id: orderId, publisher_id: 'SYSTEM', publisher_name: '现在用车',
-            from_text: '客户当前位置',
-            to_text: ZONE_LABEL[zone], when_text: '现在 · 90 分钟内', price: price || 0, seats: 1,
-            note: '⚡ 现在用车 · ' + (pickupZone ? ZONE_LABEL[pickupZone] : '位置待确认') + ' 上车' + (price ? '，已按区域价出价' : '，价格客服确认'), status: 'open'
-          })
-        });
-      } catch (e) {}
-      S.now.result = { kind: 'pool', orderId: orderId, price: price, pickupZone: pickupZone };
-    }
-    S.now.status = 'done';
-  } catch (e) {
-    S.now.status = 'done';
-    const denied = e && (e.code === 1 || /denied|权限/i.test(e.message || ''));
-    S.now.result = denied ? { kind: 'nogeo' } : { kind: 'none', err: e.message };
-  }
-  render();
+function viewOrder() {
+  const o = S.order;
+  if (!o) return viewMe();
+  const idx = stageOf(o);
+  const later = idx >= 2
+    ? wecomBlock(o)
+    : `<section class="block"><div class="block-head"><h2>履约沟通</h2></div><p class="muted">付款经客服确认后，这里会出现企微入口，方便建沟通群。</p></section>`;
+  return `<div class="view">
+    ${fulfillTimeline(o)}
+    ${demoControls(o)}
+    ${orderSummary(o)}
+    ${payDeclareBlock(o)}
+    ${later}
+    <button class="btn ghost block" data-act="order-back">返回我的预约</button>
+  </div>`;
 }
 
 function successView() {
   const o = S.order;
   if (!o) return viewHome();
-  const rows = o.type === '通勤班车'
-    ? [['行程', `${o.direction} · ${o.date}`], ['座位', `${o.seat} · ¥${o.price}`], ['乘车人', `${o.name} · ${o.phone}`]]
-        .concat(o.dropoffAddr ? [['送达', `${o.dropoff} · ${o.dropoffAddr}`]] : [])
-    : [['行程', `${o.origin} → ${o.destination}`], ['时间', o.when], ['人数', `${o.pax} 人`]];
-  return `
-  <div class="view">
+  const quoteNote = o.price == null
+    ? '<div class="reminder">这条线路需要人工报价。工作人员确认价格后，可能在企微欢迎消息里发送收款码。</div>'
+    : '';
+  return `<div class="view">
     <div class="success">
       <div class="mark">✓</div>
-      <h2>预约已登记</h2>
-      <div class="no">${o.id}</div>
+      <h2>意向已提交</h2>
+      <div class="intent-kicker">意向号</div>
+      <div class="no">${esc(o.id)}</div>
+      <p class="intent-warn">提交意向不等于锁座。余位与车辆以客服确认结果为准。</p>
     </div>
-    <div class="summary">
-      <div class="summary-head">${o.type}</div>
-      <dl>${rows.map((r) => `<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>
-      ${o.price == null ? '<div class="total"><span>价格</span><b>待客服报价</b></div>' : `<div class="total"><span>应付金额</span><b>¥${o.price}</b></div>`}
-    </div>
-    ${o.price == null
-      ? '<div class="reminder">该线路需人工报价，客服联系你确认价格后再付款。</div>'
-      : S.agreed
-        ? payCards() +
-          '<div class="muted" style="text-align:center">付款后把截图发给客服（微信 ' + CONFIG.contact.wechat + '），并注明预约号 ' + o.id + '。</div>' +
-          '<div style="text-align:center"><button class="link" data-act="open-terms">查看退改与免责条款</button></div>' +
-          '<button class="btn ghost block" data-act="mark-paid">我已付款</button>'
-        : '<div class="block"><div class="block-head"><h2>支付前请确认</h2></div>' +
-          '<ul class="policy-brief">' +
-          '<li>通勤班车：乘车前一日 20:00 前可退；之后仅候补，候补成功才退款。</li>' +
-          '<li>跨境包车：改期或取消请提前联系客服，不适用候补规则。</li>' +
-          '<li>需持有效港澳通行证及有效签注；不承诺通关时长；额外费用需人工核实。</li>' +
-          '</ul>' +
-          '<button class="btn primary block" data-act="open-terms">阅读退改与免责并支付 ¥' + o.price + '</button></div>'}
+    ${wecomBlock(o)}
+    <div class="reminder">工作人员会确认这条例意向，并可能在企微欢迎消息里发送收款码。请先添加企微，留意欢迎消息。</div>
+    ${quoteNote}
+    ${orderSummary(o)}
+    ${fulfillTimeline(o)}
+    ${demoControls(o)}
+    ${payDeclareBlock(o)}
     <div class="reminder">${REMINDER}</div>
+    <div style="text-align:center"><button class="link" data-act="open-terms">查看退改与免责条款</button></div>
     <div class="seg">
-      <button data-act="copy-order" data-val="${o.id}">复制预约号</button>
-      <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">联系客服</a>
+      <button data-act="copy-order" data-val="${esc(o.id)}">复制意向号</button>
+      <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">电话客服</a>
     </div>
-    <button class="btn primary block" data-act="tab" data-val="me">查看我的预约</button>
+    <button class="btn primary block" data-act="open-progress">在预约详情里看进度</button>
+    <button class="btn ghost block" data-act="tab" data-val="me">我的预约</button>
     <button class="btn ghost block" data-act="go" data-val="home">回首页</button>
   </div>`;
 }
@@ -1918,8 +2046,8 @@ function sheetView() {
       </ul>
       <h3>五、预约与责任</h3>
       <ul>
-        <li>本页面为预约登记工具，提交后须经客服确认并完成预付才生效。</li>
-        <li>余位为参考快照，最终以客服确认为准；满员或停运可改期或退款。</li>
+        <li>本页面为预约登记。提交意向不等于锁座，余位与车辆以客服确认结果为准。</li>
+        <li>预付由客服确认后另行收款，不在本页内扣款。满员或停运可改期或退款。</li>
         <li>因乘客自身证件、迟到或个人原因导致无法乘车，费用不予退还。</li>
       </ul>
       <h3>六、个人信息</h3>
@@ -1943,19 +2071,23 @@ function zoomView() {
 /* render */
 globalThis.__FONGGO_DEBUG__ = { S: S, render: render, loadTripEta: loadTripEta };
 function render() {
+  const same = render.last === S.view && render.step === S.step;
+  const keepScroll = same ? main.scrollTop : 0;
   renderTop();
   renderTabs();
   if (S.view === 'bus') main.innerHTML = viewBus();
   else if (S.view === 'charter') main.innerHTML = viewCharter();
   else if (S.view === 'price') main.innerHTML = viewPrice();
   else if (S.view === 'me') main.innerHTML = viewMe();
+  else if (S.view === 'order') main.innerHTML = viewOrder();
   else if (S.view === 'now') main.innerHTML = viewNow();
   else if (S.view === 'done') main.innerHTML = successView();
   else main.innerHTML = viewHome();
-  const keepScroll = S.view === 'price' ? main.scrollTop : 0;
   const sheetHost = $('#sheet');
   if (sheetHost) sheetHost.innerHTML = sheetView() + zoomView();
   main.scrollTop = keepScroll;
+  render.last = S.view;
+  render.step = S.step;
   afterRender();
 }
 
@@ -1995,7 +2127,7 @@ function submitBus() {
     seat: seat.name, price: seat.price,
     dropoff: d.dropoff || '',
     dropoffAddr: d.dropoff === '家门口' && d.homePlace ? (d.homePlace.name + (d.homePlace.addr ? ' ' + d.homePlace.addr : '')) : '',
-    name: d.name, phone: d.phone, status: '待付款', createdAt: new Date().toISOString()
+    name: d.name, phone: d.phone, stage: 0, status: '已登记', paidDeclared: false, personalWechat: '', createdAt: new Date().toISOString()
   };
   saveOrder(order);
   rememberPax({ name: d.name, phone: d.phone });
@@ -2015,11 +2147,32 @@ function submitCharter() {
     when: `${d.date} ${d.time}`, pax: d.pax || 1, childseat: !!d.childseat,
     bags: d.bags == null ? 1 : d.bags,
     price: quoteByArea(d.originArea, d.destArea),
-    status: '待客服确认', createdAt: new Date().toISOString()
+    stage: 0, status: '已登记', paidDeclared: false, personalWechat: '', createdAt: new Date().toISOString()
   };
   saveOrder(order);
   syncOrder(order);
   S.agreed = false;
+  openSuccess(order);
+}
+
+function submitNowIntent() {
+  const from = (($('#nowFrom') || {}).value || '').trim();
+  const dest = (($('#nowDest') || {}).value || S.now.dest || '');
+  const when = (($('#nowWhen') || {}).value || '').trim() || '请客服确认时间';
+  const phone = (($('#nowPhone') || {}).value || '').trim();
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 8 || digits.length > 15) return toast('请填写联系电话，方便客服回你');
+  const order = {
+    id: newOrderId('YX'), type: '用车咨询',
+    origin: from || '待沟通',
+    destination: ZONE_LABEL[dest] || dest || '待沟通',
+    when: when, phone: phone.replace(/\s+/g, ''), pax: 1, price: null,
+    stage: 0, status: '已登记', paidDeclared: false, personalWechat: '',
+    createdAt: new Date().toISOString()
+  };
+  saveOrder(order);
+  rememberPax({ name: '', phone: order.phone });
+  syncOrder(order);
   openSuccess(order);
 }
 
@@ -2260,8 +2413,49 @@ document.addEventListener('click', (e) => {
   if (act === 'paytab') { S.payTab = val; render(); return; }
   if (act === 'now-open') { S.now = { dest: 'HK_KOWLOON', status: 'idle', result: null }; S.view = 'now'; render(); return; }
   if (act === 'now-back') { S.view = 'home'; render(); return; }
-  if (act === 'now-go') { dispatchNow(); return; }
-  if (act === 'now-pay') { toast('请加客服微信付款，付完截图核对'); return; }
+  if (act === 'now-submit') { submitNowIntent(); return; }
+  if (act === 'now-go' || act === 'now-pay') { toast('请先提交用车意向，由客服确认后再安排'); return; }
+  if (act === 'wecom-add') { toast('演示占位：扫上方企微「联系我」码。正式环境换成真实二维码。'); return; }
+  if (act === 'toggle-wxid') { S.showWxId = !S.showWxId; render(); return; }
+  if (act === 'save-wxid') {
+    const v = ((($('#personalWx') || {}).value) || '').trim();
+    try { localStorage.setItem('fx_personal_wx', v); } catch (err) {}
+    if (S.order && S.order.id) {
+      const list = updateOrder(S.order.id, { personalWechat: v });
+      S.order = list.find((o) => o.id === S.order.id) || S.order;
+    }
+    S.showWxId = true;
+    render();
+    toast(v ? '已记下微信号。只有要建个人微信群时才用得上。' : '已清空微信号');
+    return;
+  }
+  if (act === 'demo-stage') {
+    if (!S.order) return;
+    const n = Number(val);
+    if (!Number.isFinite(n)) return;
+    setStage(S.order, n);
+    render();
+    toast('演示：' + FULFILL_STAGES[stageOf(S.order)]);
+    return;
+  }
+  if (act === 'open-order' || act === 'open-pay') {
+    const found = loadOrders().find((x) => x.id === val);
+    if (!found) return toast('找不到这条例意向');
+    S.order = found;
+    S.view = 'order';
+    S.tab = 'me';
+    S.showWxId = !!found.personalWechat;
+    render();
+    return;
+  }
+  if (act === 'open-progress') {
+    if (!S.order) return;
+    S.view = 'order';
+    S.tab = 'me';
+    render();
+    return;
+  }
+  if (act === 'order-back') { S.view = 'me'; S.tab = 'me'; render(); return; }
   if (act === 'pq-go') {
     const a = S.pq.from, b = S.pq.to;
     if (!zoneQuote(a, b)) return toast('该线路需人工报价');
@@ -2405,10 +2599,15 @@ document.addEventListener('click', (e) => {
 
   if (act === 'mark-paid') {
     if (!S.order) return;
-    const list = updateOrder(S.order.id, { status: '已付款待核对' });
-    S.order = list.find((o) => o.id === S.order.id) || S.order;
+    const patch = { paidDeclared: true };
+    if (stageOf(S.order) < 1) {
+      patch.stage = 1;
+      patch.status = FULFILL_STAGES[1];
+    }
+    const list = updateOrder(S.order.id, patch);
+    S.order = list.find((o) => o.id === S.order.id) || Object.assign({}, S.order, patch);
     render();
-    toast('已记录，客服核对后会确认占位');
+    toast('已记下你的付款声明。到账与否由客服确认，进度以客服更新为准。');
     return;
   }
   if (act === 'open-terms') { S.sheet = 'terms'; render(); return; }
@@ -2420,11 +2619,6 @@ document.addEventListener('click', (e) => {
     return;
   }
 
-  if (act === 'open-pay') {
-    const o = loadOrders().find((x) => x.id === val);
-    if (o) openSuccess(o);
-    return;
-  }
   if (act === 'refund-info') {
     toast('班车退票：20:00 前可退；之后仅候补，候补成功才退款');
     return;
