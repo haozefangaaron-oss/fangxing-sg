@@ -284,7 +284,7 @@
   .row .sub { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
 
   .tabs {
-    flex: 0 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
+    flex: 0 0 auto; display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
     border-top: 1px solid var(--line); background: rgba(241,238,232,.94);
     backdrop-filter: blur(10px); padding-bottom: env(safe-area-inset-bottom);
   }
@@ -650,6 +650,35 @@
   .charter-mod b { display: block; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
   .charter-mod small { display: block; margin-top: 3px; font-size: 11px; line-height: 1.4; color: rgba(58,43,16,.74); }
   .charter-mod:active { transform: scale(.985); }
+  .commute-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch; }
+  .trip-side {
+    min-width: 0; border: 1px solid var(--line); border-radius: 20px; background: var(--card);
+    padding: 12px 10px 8px; box-shadow: var(--shadow); display: flex; flex-direction: column;
+  }
+  .trip-side .fold2 { border-top: 0; padding: 0 2px 6px; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; }
+  .trip-side .fold2 > span:first-child { font-size: 15px; line-height: 1.3; }
+  .trip-side .fold2-go { font-size: 11px; margin-top: 0; }
+  .rows .row > span:first-child { min-width: 0; }
+  .trip-side .trip { padding: 8px 0; }
+  .trip-side .trip-date { font-size: 12.5px; }
+  .trip-side .trip-meta { font-size: 10.5px; }
+  .p2p {
+    background: linear-gradient(165deg, #f8f1e2, #e6d2aa);
+    border: 1px solid rgba(138,101,41,.28); border-radius: 20px; padding: 14px 14px 12px; color: #3a2b10;
+  }
+  .p2p-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+  .p2p-kicker { font-size: 10.5px; letter-spacing: .14em; opacity: .72; }
+  .p2p-title { margin-top: 4px; font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+  .p2p-route { margin-top: 2px; font-size: 12px; opacity: .75; }
+  .p2p-price { font-size: 28px; font-weight: 700; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .p2p-price span { font-size: 13px; font-weight: 650; margin-left: 2px; }
+  .p2p-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .p2p-acts button {
+    height: 36px; border-radius: 999px; border: 1px solid rgba(58,43,16,.22);
+    background: rgba(255,252,246,.8); color: #3a2b10; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .p2p-note { margin: 8px 0 0; font-size: 11.5px; line-height: 1.45; opacity: .75; }
+  .p2p .link2 { margin-top: 8px; border: 0; background: none; padding: 0; cursor: pointer; font-size: 12.5px; color: #1d3348; font-weight: 650; }
   .consult {
     width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
     padding: 12px 2px 2px; border: 0; border-top: 1px solid var(--line); background: none; cursor: pointer;
@@ -1254,6 +1283,7 @@ function renderTabs() {
   const items = [
     { id: 'home', label: '首页', ico: '<path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>' },
     { id: 'price', label: '价目', ico: '<path d="M20.5 13.4 13.4 20.5a2 2 0 0 1-2.8 0L3.5 13.4a2 2 0 0 1-.6-1.4V5a1.5 1.5 0 0 1 1.5-1.5h7a2 2 0 0 1 1.4.6l7.7 7.7a2 2 0 0 1 0 2.6Z"/><circle cx="7.6" cy="7.6" r="1.3"/>' },
+    { id: 'pay', label: '支付', ico: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M7 14h4"/>' },
     { id: 'me', label: '我的', ico: '<path d="M3 9.2V6.6A1.6 1.6 0 0 1 4.6 5h14.8A1.6 1.6 0 0 1 21 6.6v2.6a2.8 2.8 0 0 0 0 5.6v2.6a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 17.4v-2.6a2.8 2.8 0 0 0 0-5.6Z"/><path d="M9 9.8h6"/>' }
   ];
   const orderN = loadOrders().length;
@@ -1302,43 +1332,40 @@ function viewHome() {
       <p class="hero-lead">预约登记，人工确认。通勤班车与包车接送可以一起看，余位和车辆都等客服回你。</p>
     </section>
 
-    <section class="peers" aria-label="预约入口">
+    <section class="commute-row" aria-label="通勤班车">
+      <div class="trip-side">
+        <button class="fold2 ${S.showTrips ? 'open' : ''}" data-act="toggle-trips">
+          <span>近期班次（参考）</span>
+          <span class="fold2-go">${next ? `${next.getMonth() + 1}/${next.getDate()} · ${soldOut ? '参考已满' : '参考余 ' + nextLeft + ' 座'}` : '暂无'} <i class="chev">›</i></span>
+        </button>
+        ${S.showTrips ? `<div class="fold-body">${tripRows(3)}<div class="muted" style="padding:2px 2px 6px;font-size:11px">余位仅供参考，以客服确认为准。</div></div>` : '<div style="flex:1"></div>'}
+      </div>
       <button class="peer navy" data-act="go" data-val="bus">
         <span class="peer-kicker">通勤班车</span>
         <span class="peer-title">福田 ↔ 香港 IFC</span>
-        <span class="peer-sub">工作日 07:45 集合<br>返程 18:40<br>登记班车意向</span>
+        <span class="peer-sub">工作日 07:45 集合<br>返程 18:40</span>
         <span class="peer-foot"><span><b>¥108</b><em>起</em></span><span class="peer-cta">登记意向</span></span>
       </button>
-      <div class="peer gold charter-panel">
-        <span class="peer-kicker">包车 / 接送</span>
-        <span class="peer-title">深港点对点</span>
-        <div class="charter-mods">
-          <button class="charter-mod" data-act="now-open">
-            <b>立即用车</b>
-            <small>登记意向，客服确认车辆和时间</small>
-          </button>
-          <button class="charter-mod" data-act="go" data-val="charter">
-            <b>预约用车</b>
-            <small>登记包车意向</small>
-          </button>
-        </div>
-      </div>
     </section>
 
-    <div>
-      <button class="fold2 ${S.showTrips ? 'open' : ''}" data-act="toggle-trips">
-        <span>近期班次（参考）</span>
-        <span class="fold2-go">${next ? `${next.getMonth() + 1}/${next.getDate()} · ${soldOut ? '参考已满' : '参考余 ' + nextLeft + ' 座'}` : '暂无'} <i class="chev">›</i></span>
-      </button>
-      ${S.showTrips ? `<div class="fold-body">${tripRows(4)}<div class="muted" style="padding:4px 2px 8px">页面上的余位只是参考，以客服确认结果为准。</div></div>` : ''}
-    </div>
+    <section class="p2p" aria-label="深港点对点">
+      <div class="p2p-top">
+        <div>
+          <div class="p2p-kicker">包车 / 接送</div>
+          <div class="p2p-title">深港点对点</div>
+          <div class="p2p-route">市区 → 九龙</div>
+        </div>
+        <div class="p2p-price">¥498<span>起</span></div>
+      </div>
+      <button class="link2" data-act="tab" data-val="price">查看报价</button>
+      <div class="p2p-acts">
+        <button data-act="now-open">立即用车</button>
+        <button data-act="go" data-val="charter">预约用车</button>
+      </div>
+      <p class="p2p-note">登记意向，客服确认车辆和时间。</p>
+    </section>
 
     ${wecomBlock(null)}
-
-    <div class="links">
-      <button data-act="tab" data-val="price"><span>价目与规则</span><b>票价 · 包车报价 · 退改</b></button>
-      <button data-act="tab" data-val="me"><span>我的预约</span><b>意向号与履约进度</b></button>
-    </div>
 
     <div class="fine">本页为预约登记工具，不代办港澳通行证、不审核签注；通关耗时受口岸排队影响，恕不承诺过关时长。你的下一程，也是我的下一程。</div>
   </div>`;
@@ -1751,10 +1778,20 @@ function pqResultHTML() {
     '<button class="btn gold block" style="margin-top:12px" data-act="pq-go">按这个价登记意向</button>';
 }
 function charterListHTML() {
-  return '<div class="quote-list">' + CHARTER_LIST.map((r) =>
-    '<div><span>' + esc(r.text) + '</span><b>¥' + r.price + '</b></div>'
+  return '<div class="rows">' + CHARTER_LIST.map((r) =>
+    '<div class="row"><span>' + esc(r.text) + '</span><b>¥' + r.price + '</b></div>'
   ).join('') + '</div>' +
-    '<div class="muted" style="margin-top:8px;font-size:11.5px;line-height:1.6">7 座埃尔法，可加装儿童安全座椅。隧道费、停车费、等候费、夜间附加费、节假日加价需人工确认。未列出的线路请联系客服。</div>';
+    '<div class="muted" style="margin-top:10px;line-height:1.7">7 座埃尔法，可加装儿童安全座椅。隧道费、停车费、等候费、夜间附加费、节假日加价需人工确认。未列出的线路请联系客服。</div>';
+}
+function viewPay() {
+  return `<div class="view">
+    <div class="block">
+      <div class="block-head"><h2>支付方式</h2><span class="muted">客服发送收款码</span></div>
+      <div class="muted" style="margin-bottom:10px">${PAY_TEXT}。车费不在本页扣除。工作人员确认意向后，可能在企微欢迎消息里发送收款码。下面是演示用图。</div>
+      ${payCards()}
+    </div>
+    <div class="reminder">${REMINDER}</div>
+  </div>`;
 }
 
 function viewPrice() {
@@ -1780,7 +1817,7 @@ function viewPrice() {
     </div>
 
     <div class="block">
-      <div class="block-head"><h2>包车自助报价</h2><span class="muted">选两个区域，看出价</span></div>
+      <div class="block-head"><h2>包车自助报价</h2><span class="muted">选两个区域，立即出价</span></div>
       <div class="field-row">
         <label class="field" style="flex:1"><span>出发区域</span>
           <select id="pqFrom" class="sel">${QUOTE_ZONES.map((z) => `<option value="${z.code}" ${S.pq.from === z.code ? 'selected' : ''}>${z.label}</option>`).join('')}</select>
@@ -1790,6 +1827,10 @@ function viewPrice() {
         </label>
       </div>
       ${pqResultHTML()}
+    </div>
+
+    <div class="block">
+      <div class="block-head"><h2>跨境包车报价</h2><span class="pill gold">一口价</span></div>
       ${charterListHTML()}
     </div>
 
@@ -1800,12 +1841,6 @@ function viewPrice() {
         <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">联系客服</a>
         <button data-act="wecom-add">添加企微客服</button>
       </div>
-    </div>
-
-    <div class="block">
-      <div class="block-head"><h2>支付方式</h2><span class="muted">客服发送收款码</span></div>
-      <div class="muted" style="margin-bottom:10px">${PAY_TEXT}。车费不在本页扣除。工作人员确认意向后，可能在企微欢迎消息里发送收款码。下面是演示用图。</div>
-      ${payCards()}
     </div>
 
     <div class="reminder">${REMINDER}</div>
@@ -2098,6 +2133,7 @@ function render() {
   if (S.view === 'bus') main.innerHTML = viewBus();
   else if (S.view === 'charter') main.innerHTML = viewCharter();
   else if (S.view === 'price') main.innerHTML = viewPrice();
+  else if (S.view === 'pay') main.innerHTML = viewPay();
   else if (S.view === 'me') main.innerHTML = viewMe();
   else if (S.view === 'order') main.innerHTML = viewOrder();
   else if (S.view === 'now') main.innerHTML = viewNow();
@@ -2114,7 +2150,7 @@ function render() {
 /* nav */
 function go(view) {
   S.view = view; S.step = 0; S.draft = {}; S.order = null; S.q = ''; S.results = [];
-  if (['home', 'price', 'me'].includes(view)) S.tab = view;
+  if (['home', 'price', 'pay', 'me'].includes(view)) S.tab = view;
   render();
 }
 function back() {
