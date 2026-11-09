@@ -770,20 +770,19 @@
     box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px;
   }
   .wecom .btn { height: auto; min-height: 46px; padding-top: 10px; padding-bottom: 10px; white-space: normal; line-height: 1.35; text-align: center; }
-  .wecom-row { display: flex; align-items: center; gap: 12px; }
-  .wecom-row > div:first-child { flex: 1 1 auto; min-width: 0; }
-  .wecom-row b { font-size: 14px; font-weight: 650; }
-  .wecom-row small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+  .wecom-row { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+  .wecom-row b { font-size: 16px; font-weight: 700; }
+  .wecom-row small { display: block; color: var(--muted); font-size: 12px; }
   .wecom-qr {
-    width: 92px; height: 92px; flex: 0 0 auto; border-radius: 12px;
-    border: 1px dashed rgba(138,101,41,.5);
-    background: repeating-linear-gradient(45deg, #fbf7ee, #fbf7ee 6px, #f3ead8 6px, #f3ead8 12px);
-    display: grid; place-items: center; overflow: hidden;
+    width: min(260px, 72vw); aspect-ratio: 1; margin: 2px auto 0;
+    border-radius: 12px; background: #fff; border: 1px solid var(--line);
+    padding: 8px; display: grid; place-items: center; overflow: hidden;
   }
   .wecom-qr img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
-  .wecom-qr .ph { display: none; text-align: center; font-size: 10px; color: #6d5424; line-height: 1.45; padding: 6px; }
+  .wecom-qr .ph { display: none; text-align: center; font-size: 12px; color: var(--muted); line-height: 1.45; padding: 12px; }
   .wecom-qr.missing .ph { display: block; }
   .wecom-qr.missing img { display: none; }
+  .wecom-cap { margin: 0; text-align: center; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
   .intent-kicker { margin-top: 12px; font-size: 11px; letter-spacing: .2em; color: var(--muted); }
   .intent-warn { margin: 8px auto 0; max-width: 28em; font-size: 13px; color: #6d5424; line-height: 1.6; }
   @media (max-width: 360px) {
@@ -810,7 +809,7 @@ const BRAND = { zh: '方行深港', en: 'FONGGO', tag: '深港通勤 · 点对�
 const CONFIG = {
   contact: { wechat: '13930365066', phone: '13930365066', note: '电话可直接拨打。建群请优先加企微客服，不必先留个人微信。' },
   /* 企微「联系我」二维码：把图片放到同目录后把文件名填进来。留空则显示占位。 */
-  wecom: { qr: '', name: '方行深港企微客服' },
+  wecom: { qr: 'assets/wecom-contact-qr.png', name: '方皓泽', role: 'FongGo客服' },
   /* 收款码图片：把微信/支付宝收款码截图命名为下面两个文件名，放在 index.html 同目录 */
   pay: { wechat: 'pay-wechat.png', alipay: 'pay-alipay.png' },
   /* 高德 Web 服务 Key（免费申请）：留空则用内置地点库 + 手动填写 */
@@ -1314,17 +1313,17 @@ function wecomBlock(order) {
   const qr = (CONFIG.wecom && CONFIG.wecom.qr) || '';
   const saved = savedWx(order);
   const showForm = !!(S.showWxId || saved);
-  const qrHtml = `<div class="wecom-qr${qr ? '' : ' missing'}">${qr ? `<img src="${esc(qr)}" alt="企微联系我二维码" onerror="this.parentNode.classList.add('missing')">` : ''}<div class="ph">企微「联系我」码<br>占位 · 待替换</div></div>`;
+  const qrHtml = `<div class="wecom-qr${qr ? '' : ' missing'}">${qr ? `<img src="${esc(qr)}" alt="方皓泽的企业微信二维码" onerror="this.parentNode.classList.add('missing')">` : ''}<div class="ph">企微码未加载</div></div>`;
   return `<section class="wecom" id="wecomGate">
     <div class="block-head"><h2>履约沟通</h2><span class="pill gold">企微优先</span></div>
-    <p class="muted">先添加企微客服。工作人员确认意向后，可能在欢迎消息里发送收款码，并按需要建沟通群。</p>
     <div class="wecom-row">
       <div>
-        <b>添加企微客服</b>
-        <small>推荐。方便建沟通群。</small>
+        <b>${esc((CONFIG.wecom && CONFIG.wecom.name) || '方皓泽')}</b>
+        <small>${esc((CONFIG.wecom && CONFIG.wecom.role) || 'FongGo客服')}</small>
       </div>
       ${qrHtml}
     </div>
+    <p class="wecom-cap">扫描添加企业微信 · 确认后由客服发收款说明；余位以确认为准</p>
     <button class="btn primary block" data-act="wecom-add">添加企微客服（推荐，便于建沟通群）</button>
     <button class="btn ghost block" data-act="toggle-wxid">${showForm ? '收起微信号' : '填写微信号（仅个微群需要，选填）'}</button>
     ${showForm ? `<label class="field"><span>微信号（选填，仅个微群需要）</span>
@@ -2955,7 +2954,7 @@ document.addEventListener('click', (e) => {
   if (act === 'now-back') { S.view = 'home'; render(); return; }
   if (act === 'now-submit') { submitNowIntent(); return; }
   if (act === 'now-go' || act === 'now-pay') { toast('请先提交用车意向，由客服确认后再安排'); return; }
-  if (act === 'wecom-add') { toast('演示占位：扫上方企微「联系我」码。正式环境换成真实二维码。'); return; }
+  if (act === 'wecom-add') { toast('请扫描上方企业微信码，添加方皓泽。确认后由客服发收款说明。'); return; }
   if (act === 'toggle-wxid') { S.showWxId = !S.showWxId; render(); return; }
   if (act === 'save-wxid') {
     const v = ((($('#personalWx') || {}).value) || '').trim();
