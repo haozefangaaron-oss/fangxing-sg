@@ -1935,12 +1935,6 @@ function pqResultHTML() {
     '<div class="muted" style="font-size:11.5px;margin-top:4px">基础一口价；夜间、节假日、等候、隧道停车等另计，需人工确认。</div>' +
     '<button class="btn gold block" style="margin-top:12px" data-act="pq-go">按这个价登记意向</button>';
 }
-function charterListHTML() {
-  return '<div class="rows">' + CHARTER_LIST.map((r) =>
-    '<div class="row"><span>' + esc(r.text) + '</span><b>¥' + r.price + '</b></div>'
-  ).join('') + '</div>' +
-    '<div class="muted" style="margin-top:10px;line-height:1.7">7 座埃尔法，可加装儿童安全座椅。隧道费、停车费、等候费、夜间附加费、节假日加价需人工确认。未列出的线路请联系客服。</div>';
-}
 function viewPay() {
   return `<div class="view">
     <div class="block">
@@ -1985,20 +1979,7 @@ function viewPrice() {
         </label>
       </div>
       ${pqResultHTML()}
-    </div>
-
-    <div class="block">
-      <div class="block-head"><h2>跨境包车报价</h2><span class="pill gold">一口价</span></div>
-      ${charterListHTML()}
-    </div>
-
-    <div class="block">
-      <div class="block-head"><h2>包车 · 改期与取消</h2></div>
-      <div class="muted">包车改期、取消、加停靠点，请提前联系客服确认车辆与费用，不适用班车的候补规则。</div>
-      <div class="seg" style="margin-top:12px">
-        <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">联系客服</a>
-        <button data-act="wecom-add">添加企微客服</button>
-      </div>
+      <div class="muted" style="margin-top:10px">未覆盖的线路与附加费，以客服确认为准。</div>
     </div>
 
     <div class="reminder">${REMINDER}</div>
@@ -2227,6 +2208,15 @@ function viewMe() {
       <div class="muted">只保存在本机浏览器。提交意向不等于锁座，余位与车辆以客服确认为准。点「履约进度」可以看时间轴。</div>
       ${list}
       ${orders.length ? '<button class="btn ghost block small" style="margin-top:12px" data-act="clear-orders">清除本机记录</button>' : ''}
+    </div>
+
+    <div class="block">
+      <div class="block-head"><h2>改期与取消</h2></div>
+      <div class="muted">改期、取消、加停靠点，请提前联系客服确认车辆与费用。班车的候补规则不在这里适用。</div>
+      <div class="seg" style="margin-top:12px">
+        <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">联系客服</a>
+        <button data-act="wecom-add">添加企微客服</button>
+      </div>
     </div>
 
     ${wecomBlock(null)}
