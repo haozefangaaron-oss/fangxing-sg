@@ -273,6 +273,14 @@
   .live-map .cap b { display: block; font-size: 13px; }
   .live-map .cap span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
   .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #1f6b4c; display: inline-block; margin-right: 6px; box-shadow: 0 0 0 3px rgba(31,107,76,.18); }
+  .login { align-items: center; justify-content: center; min-height: 70dvh; }
+  .login-card { width: 100%; text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; padding: 12px 8px 24px; }
+  .login-card .logo { width: 64px; height: 64px; border-radius: 18px; }
+  .login-name { font-size: 22px; font-weight: 700; letter-spacing: .04em; }
+  .login-sub { font-size: 12px; color: var(--muted); letter-spacing: .2em; }
+  .login-avatar { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold); border: 1px solid rgba(133,97,40,.28); font-size: 22px; font-weight: 700; }
+  .login-card h2 { font-size: 18px; margin: 6px 0 0; }
+  .login-card p { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0 8px 8px; }
   .fares { display: flex; flex-wrap: wrap; gap: 0 18px; padding-top: 11px; border-top: 1px solid var(--line-2); }
   .fares span { font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; }
   .fares span b { font-weight: 400; color: var(--muted); margin-right: 5px; font-size: 12px; }
@@ -307,7 +315,7 @@
   .row .sub { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
 
   .tabs {
-    flex: 0 0 auto; display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
+    flex: 0 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
     border-top: 1px solid var(--line); background: rgba(241,238,232,.94);
     backdrop-filter: blur(10px); padding-bottom: env(safe-area-inset-bottom);
   }
@@ -1307,7 +1315,7 @@ function wecomBlock(order) {
   const saved = savedWx(order);
   const showForm = !!(S.showWxId || saved);
   const qrHtml = `<div class="wecom-qr${qr ? '' : ' missing'}">${qr ? `<img src="${esc(qr)}" alt="企微联系我二维码" onerror="this.parentNode.classList.add('missing')">` : ''}<div class="ph">企微「联系我」码<br>占位 · 待替换</div></div>`;
-  return `<section class="wecom">
+  return `<section class="wecom" id="wecomGate">
     <div class="block-head"><h2>履约沟通</h2><span class="pill gold">企微优先</span></div>
     <p class="muted">先添加企微客服。工作人员确认意向后，可能在欢迎消息里发送收款码，并按需要建沟通群。</p>
     <div class="wecom-row">
@@ -1342,18 +1350,11 @@ function orderSummary(o) {
     ${o.price == null ? '<div class="total"><span>价格</span><b>待客服报价</b></div>' : `<div class="total"><span>参考金额</span><b>¥${o.price}</b></div>`}
   </div>`;
 }
-function payDeclareBlock(o) {
-  if (stageOf(o) >= 2) {
-    return `<section class="block">
-      <div class="block-head"><h2>付款</h2><span class="pill ok">付款已确认</span></div>
-      <p class="muted">这一步表示工作人员已核对。客户点的「我已付款」只是声明，不会自动变成付款已确认。</p>
-    </section>`;
-  }
+function payGuide() {
   return `<section class="block">
-    <div class="block-head"><h2>付款声明</h2></div>
-    <p class="muted">车费不在本页支付。工作人员确认后，可能在企微欢迎消息里发送收款码。你按指引付完，可以在这里告诉客服。</p>
-    ${o.paidDeclared ? '<div class="reminder">已记下「我已付款」。这是你的声明，不是「付款已确认」。</div>' : ''}
-    <button class="btn ghost block" data-act="mark-paid">我已付款</button>
+    <div class="block-head"><h2>确认付款</h2></div>
+    <p class="muted">确认后由客服发收款说明；余位以确认为准。</p>
+    <button class="btn primary block" data-act="show-wecom">添加企微客服确认付款</button>
   </section>`;
 }
 
@@ -1409,7 +1410,6 @@ function renderTabs() {
   const items = [
     { id: 'home', label: '首页', ico: '<path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>' },
     { id: 'price', label: '价目', ico: '<path d="M20.5 13.4 13.4 20.5a2 2 0 0 1-2.8 0L3.5 13.4a2 2 0 0 1-.6-1.4V5a1.5 1.5 0 0 1 1.5-1.5h7a2 2 0 0 1 1.4.6l7.7 7.7a2 2 0 0 1 0 2.6Z"/><circle cx="7.6" cy="7.6" r="1.3"/>' },
-    { id: 'pay', label: '支付', ico: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M7 14h4"/>' },
     { id: 'me', label: '我的', ico: '<path d="M3 9.2V6.6A1.6 1.6 0 0 1 4.6 5h14.8A1.6 1.6 0 0 1 21 6.6v2.6a2.8 2.8 0 0 0 0 5.6v2.6a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 17.4v-2.6a2.8 2.8 0 0 0 0-5.6Z"/><path d="M9 9.8h6"/>' }
   ];
   const orderN = loadOrders().length;
@@ -1935,14 +1935,18 @@ function pqResultHTML() {
     '<div class="muted" style="font-size:11.5px;margin-top:4px">基础一口价；夜间、节假日、等候、隧道停车等另计，需人工确认。</div>' +
     '<button class="btn gold block" style="margin-top:12px" data-act="pq-go">按这个价登记意向</button>';
 }
-function viewPay() {
-  return `<div class="view">
-    <div class="block">
-      <div class="block-head"><h2>支付方式</h2><span class="muted">客服发送收款码</span></div>
-      <div class="muted" style="margin-bottom:10px">${PAY_TEXT}。车费不在本页扣除。工作人员确认意向后，可能在企微欢迎消息里发送收款码。下面是演示用图。</div>
-      ${payCards()}
+function viewLogin() {
+  return `<div class="view login">
+    <div class="login-card">
+      <div class="logo" aria-hidden="true"><span class="fg">FG</span><span class="hk">HK</span></div>
+      <div class="login-name">FongGo</div>
+      <div class="login-sub">方行深港</div>
+      <div class="login-avatar" aria-hidden="true">微</div>
+      <h2>微信用户信息授权</h2>
+      <p>用于展示昵称和头像，方便查看你的预约。这是演示，不会连接真实微信登录。</p>
+      <button class="btn primary block" data-act="auth-in">授权并进入</button>
+      <button class="btn ghost block" data-act="auth-skip">暂不登录可浏览</button>
     </div>
-    <div class="reminder">${REMINDER}</div>
   </div>`;
 }
 
@@ -2131,6 +2135,7 @@ function pointAlong(points, t) {
   };
 }
 function updateVehiclePosition(lat, lng) {
+  S.gpsMode = 'driver';
   S.vehicleOverride = { lat: Number(lat), lng: Number(lng) };
   const marker = document.getElementById('carMarker');
   const order = S.order;
@@ -2144,10 +2149,12 @@ function vehicleMap(order) {
   const idx = stageOf(order);
   if (idx < 4) return '';
   const live = idx === 4;
+  const mode = S.gpsMode || 'demo';
   const route = orderRoute(order);
-  const pos = S.vehicleOverride || pointAlong(route, S.vehicleT == null ? 0.46 : S.vehicleT);
-  const pts = route.map((p) => projectRoute(route, p));
-  const car = projectRoute(route, pos);
+  const pos = S.vehicleOverride || (mode === 'live' && S.gps) || pointAlong(route, S.vehicleT == null ? 0.46 : S.vehicleT);
+  const bounds = route.concat([pos]);
+  const pts = route.map((p) => projectRoute(bounds, p));
+  const car = projectRoute(bounds, pos);
   const d = pts.map((p, i) => (i ? 'L' : 'M') + p.x + ' ' + p.y).join(' ');
   const fromName = (order && (order.origin || order.direction)) || '出发地';
   const toName = (order && order.destination) || '目的地';
@@ -2166,7 +2173,7 @@ function vehicleMap(order) {
       </g>
     </svg>
     <div class="cap">
-      <b>${live ? '<i class="live-dot"></i>车辆实时位置（演示）· 约每 15 秒刷新' : '车辆位置已停更（演示）'}</b>
+      <b>${!live ? '车辆位置已停更（演示）' : mode === 'driver' ? '<i class="live-dot"></i>车辆实时位置 · 已接入坐标' : mode === 'live' ? '<i class="live-dot"></i>实时定位 · 浏览器 GPS' : '<i class="live-dot"></i>车辆实时位置（演示）· 未获得定位'}</b>
       <span>${esc(fromName)} → ${esc(toName)} · 约 18 分钟后到达</span>
     </div>
   </section>`;
@@ -2175,12 +2182,30 @@ function syncVehicleTicker() {
   const live = S.order && stageOf(S.order) === 4 && (S.view === 'order' || S.view === 'done');
   if (!live) {
     if (vehicleTick) { clearInterval(vehicleTick); vehicleTick = null; }
+    if (gpsWatch != null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(gpsWatch);
+      gpsWatch = null;
+    }
     return;
+  }
+  if (S.gpsMode !== 'driver' && gpsWatch == null && navigator.geolocation) {
+    gpsWatch = navigator.geolocation.watchPosition((pos) => {
+      if (S.gpsMode === 'driver') return;
+      S.gpsMode = 'live';
+      S.gps = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      const box = document.getElementById('vehicleMap');
+      if (box && S.order) box.outerHTML = vehicleMap(S.order);
+    }, () => {
+      if (S.gpsMode !== 'driver') S.gpsMode = 'demo';
+    }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 8000 });
+  } else if (!navigator.geolocation && S.gpsMode !== 'driver') {
+    S.gpsMode = 'demo';
   }
   if (vehicleTick) return;
   if (S.vehicleT == null) S.vehicleT = 0.46;
   vehicleTick = setInterval(() => {
     if (!S.order || stageOf(S.order) !== 4) return;
+    if (S.gpsMode === 'live' || S.gpsMode === 'driver') return;
     S.vehicleOverride = null;
     S.vehicleT = ((S.vehicleT || 0.46) + 0.08) % 0.9;
     const box = document.getElementById('vehicleMap');
@@ -2188,6 +2213,7 @@ function syncVehicleTicker() {
   }, 15000);
 }
 let vehicleTick = null;
+let gpsWatch = null;
 
 function viewMe() {
   const orders = loadOrders();
@@ -2317,15 +2343,13 @@ function viewOrder() {
   const o = S.order;
   if (!o) return viewMe();
   const idx = stageOf(o);
-  const later = idx >= 2
-    ? wecomBlock(o)
-    : `<section class="block"><div class="block-head"><h2>履约沟通</h2></div><p class="muted">付款经客服确认后，这里会出现企微入口，方便建沟通群。</p></section>`;
+  const later = (idx >= 2 || S.forceWecom) ? wecomBlock(o) : '';
   return `<div class="view">
     ${fulfillTimeline(o)}
     ${vehicleMap(o)}
     ${demoControls(o)}
     ${orderSummary(o)}
-    ${payDeclareBlock(o)}
+    ${payGuide()}
     ${later}
     <button class="btn ghost block" data-act="order-back">返回我的预约</button>
   </div>`;
@@ -2345,14 +2369,14 @@ function successView() {
       <div class="no">${esc(o.id)}</div>
       <p class="intent-warn">提交意向不等于锁座。余位与车辆以客服确认结果为准。</p>
     </div>
+    ${payGuide()}
     ${wecomBlock(o)}
-    <div class="reminder">工作人员会确认这条例意向，并可能在企微欢迎消息里发送收款码。请先添加企微，留意欢迎消息。</div>
+    <div class="reminder">确认后由客服发收款说明；余位以确认为准。</div>
     ${quoteNote}
     ${orderSummary(o)}
     ${fulfillTimeline(o)}
     ${vehicleMap(o)}
     ${demoControls(o)}
-    ${payDeclareBlock(o)}
     <div class="reminder">${REMINDER}</div>
     <div style="text-align:center"><button class="link" data-act="open-terms">查看退改与免责条款</button></div>
     <div class="seg">
@@ -2419,7 +2443,7 @@ function sheetView() {
         <li>姓名与电话仅用于本次行程联系，不作其他用途。</li>
       </ul>
     </div>
-    <button class="btn primary block" data-act="agree-pay">同意并支付 ${amount}</button>
+    <button class="btn primary block" data-act="agree-wecom">已阅读，去添加企微</button>
     <div class="muted" style="text-align:center;font-size:11px;margin-top:8px">点击即表示你已阅读并同意上述条款</div>
   </div>`;
 }
@@ -2437,12 +2461,14 @@ globalThis.__FONGGO_DEBUG__ = { S: S, render: render, loadTripEta: loadTripEta }
 function render() {
   const same = render.last === S.view && render.step === S.step;
   const keepScroll = same ? main.scrollTop : 0;
+  const tabs = document.getElementById('tabs');
+  if (tabs) tabs.style.display = S.view === 'login' ? 'none' : '';
   renderTop();
   renderTabs();
   if (S.view === 'bus') main.innerHTML = viewBus();
   else if (S.view === 'charter') main.innerHTML = viewCharter();
+  else if (S.view === 'login') main.innerHTML = viewLogin();
   else if (S.view === 'price') main.innerHTML = viewPrice();
-  else if (S.view === 'pay') main.innerHTML = viewPay();
   else if (S.view === 'me') main.innerHTML = viewMe();
   else if (S.view === 'order') main.innerHTML = viewOrder();
   else if (S.view === 'now') main.innerHTML = viewNow();
@@ -2459,7 +2485,8 @@ function render() {
 /* nav */
 function go(view) {
   S.view = view; S.step = 0; S.draft = {}; S.order = null; S.q = ''; S.results = [];
-  if (['home', 'price', 'pay', 'me'].includes(view)) S.tab = view;
+  if (view === 'pay') view = 'home';
+  if (['home', 'price', 'me'].includes(view)) S.tab = view;
   render();
 }
 function back() {
@@ -2825,7 +2852,31 @@ document.addEventListener('click', (e) => {
   const act = el.dataset.act;
   const val = el.dataset.val;
 
-  if (act === 'tab') return circleGo(val, e.clientX, e.clientY, el);
+  if (act === 'auth-in') {
+    try { localStorage.setItem('fx_auth_v1', '1'); } catch (err) {}
+    S.view = 'home';
+    S.tab = 'home';
+    render();
+    return;
+  }
+  if (act === 'auth-skip') {
+    S.view = 'home';
+    S.tab = 'home';
+    render();
+    return;
+  }
+  if (act === 'show-wecom' || act === 'mark-paid' || act === 'agree-wecom') {
+    S.forceWecom = true;
+    S.sheet = null;
+    render();
+    const gate = document.getElementById('wecomGate');
+    if (gate && gate.scrollIntoView) gate.scrollIntoView({ block: 'start' });
+    return;
+  }
+  if (act === 'tab') {
+    if (val === 'pay') return;
+    return circleGo(val, e.clientX, e.clientY, el);
+  }
   if (act === 'go') return go(val);
   if (act === 'back') return back();
   if (act === 'toggle-trips') { S.showTrips = !S.showTrips; render(); return; }
@@ -3204,8 +3255,8 @@ if (!main.dataset.scrollHooked) {
     document.body.classList.toggle('is-scrolled', main.scrollTop > 6);
   }, { passive: true });
 }
-checkPayImages();
 flushPending();
+try { if (localStorage.getItem('fx_auth_v1') !== '1') S.view = 'login'; } catch (err) { S.view = 'login'; }
 render();
 </script>
 </body>
