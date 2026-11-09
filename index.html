@@ -262,6 +262,17 @@
   .place-tap small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.45; }
   .place-tap .ph { color: var(--muted); font-size: 14px; }
   .amap-foot { text-align: center; font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .time-field {
+    height: 48px; width: 100%; text-align: left; padding: 0 14px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--card); font-size: 16px; cursor: pointer;
+    font-variant-numeric: tabular-nums;
+  }
+  .live-map { margin-top: 12px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #e7eef2; }
+  .live-map svg { display: block; width: 100%; height: auto; }
+  .live-map .cap { padding: 8px 12px 10px; background: var(--card); }
+  .live-map .cap b { display: block; font-size: 13px; }
+  .live-map .cap span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #1f6b4c; display: inline-block; margin-right: 6px; box-shadow: 0 0 0 3px rgba(31,107,76,.18); }
   .fares { display: flex; flex-wrap: wrap; gap: 0 18px; padding-top: 11px; border-top: 1px solid var(--line-2); }
   .fares span { font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; }
   .fares span b { font-weight: 400; color: var(--muted); margin-right: 5px; font-size: 12px; }
@@ -1815,14 +1826,9 @@ function charterBody(key) {
       <div class="field"><span>用车日期</span><input type="date" id="charterDate" min="${ymd(new Date())}" value="${esc(d.date || '')}"></div>
       <div class="gap-8"></div>
       <div class="field"><span>具体时间</span>
-        <div class="wheel-wrap" id="timeWheel" data-value="${esc(d.time || '08:00')}">
-          <div class="wheel-band"></div>
-          <div class="wheel" id="timeWheelTrack" role="listbox" aria-label="用车时间" tabindex="0">
-            ${TIME_SLOTS.map((t) => `<div class="wheel-item" role="option" data-t="${t}">${t}</div>`).join('')}
-          </div>
-        </div>
+        <button type="button" class="time-field" data-act="open-time" data-val="charter">${esc(d.time || '08:00')}</button>
       </div>
-      <div class="muted" style="text-align:center">上下拖动选择，松手自动吸附到最近刻度</div>
+      <div class="muted">点开选择，按半小时对齐。最终以客服确认为准。</div>
     </div>`;
   }
   if (key === 'detail') {
@@ -2025,16 +2031,17 @@ function orderCard(o) {
   </div>`;
 }
 
-function nowPlaceField() {
-  const p = S.now.fromPlace;
+function nowPlaceField(which) {
+  const p = which === 'to' ? S.now.toPlace : S.now.fromPlace;
+  const ph = which === 'to' ? '高德选点 · 搜索目的地' : '高德选点 · 搜索出发地';
   if (p && p.name) {
-    return `<button class="place-tap" data-act="open-amap" type="button">
+    return `<button class="place-tap" data-act="open-amap" data-val="${which}" type="button">
       <b>${esc(p.name)}</b>
       <small>${esc(p.addr || '')}</small>
       <small>重选 · 高德选点</small>
     </button>`;
   }
-  return `<button class="place-tap" data-act="open-amap" type="button"><span class="ph">高德选点 · 搜索出发地</span></button>`;
+  return `<button class="place-tap" data-act="open-amap" data-val="${which}" type="button"><span class="ph">${ph}</span></button>`;
 }
 function viewNow() {
   const phone = S.now.phone || lastPax().phone || '';
@@ -2045,17 +2052,15 @@ function viewNow() {
       <h2>立即用车</h2>
       <p>登记用车意向。工作人员确认车辆和时间后再安排。余位与车辆以确认结果为准。</p>
     </div>
-    <div class="field"><span>出发地</span>${nowPlaceField()}</div>
-    <label class="field"><span>目的地区域</span>
-      <select id="nowDest">${districtOptions(S.now.dest)}</select>
-    </label>
+    <div class="field"><span>出发地</span>${nowPlaceField('from')}</div>
+    <div class="field"><span>目的地</span>${nowPlaceField('to')}</div>
     <label class="field"><span>用车日期</span>
       <input type="date" id="nowDate" min="${hkToday()}" value="${esc(date)}">
     </label>
-    <label class="field"><span>希望出发时间</span>
-      <input type="time" id="nowTime" step="1800" value="${esc(time)}">
-    </label>
-    <div class="muted">出发时间可点选。最终以客服确认为准。</div>
+    <div class="field"><span>希望出发时间</span>
+      <button type="button" class="time-field" data-act="open-time" data-val="now">${esc(time)}</button>
+    </div>
+    <div class="muted">点开选择，按半小时对齐。最终以客服确认为准。</div>
     <label class="field"><span>联系电话</span><input id="nowPhone" inputmode="tel" maxlength="20" placeholder="方便客服回你" value="${esc(phone)}"></label>
     <button class="btn primary block" data-act="now-submit">提交用车意向</button>
     <div class="reminder">提交后会生成意向号。工作人员确认前，行程都还没定下来。</div>
@@ -2077,7 +2082,7 @@ function amapSheet() {
   <div class="mask" data-act="close-sheet"></div>
   <div class="sheet" role="dialog" aria-modal="true" aria-label="高德选点">
     <div class="sheet-grip"></div>
-    <div class="sheet-head">高德选点 <button class="link" data-act="close-sheet" style="float:right;font-size:12px">关闭</button></div>
+    <div class="sheet-head">高德选点 · ${S.amapFor === 'to' ? '目的地' : '出发地'} <button class="link" data-act="close-sheet" style="float:right;font-size:12px">关闭</button></div>
     <div class="searchbox">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="amapSearch" autocomplete="off" placeholder="搜索机场、口岸、商场、酒店" value="${esc(S.amapQ || '')}">
@@ -2087,6 +2092,121 @@ function amapSheet() {
     <div class="amap-foot">地点数据来自高德地图</div>
   </div>`;
 }
+function timeSheet() {
+  if (S.sheet !== 'time') return '';
+  const value = S.timeDraft || '08:00';
+  return `
+  <div class="mask" data-act="close-sheet"></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="选择时间">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">选择出发时间 <button class="link" data-act="close-sheet" style="float:right;font-size:12px">关闭</button></div>
+    <div class="wheel-wrap" id="timeWheel" data-value="${esc(value)}">
+      <div class="wheel-band"></div>
+      <div class="wheel" id="timeWheelTrack" role="listbox" aria-label="用车时间" tabindex="0">
+        ${TIME_SLOTS.map((t) => `<div class="wheel-item" role="option" data-t="${t}">${t}</div>`).join('')}
+      </div>
+    </div>
+    <div class="muted" style="text-align:center;margin:8px 0">上下拖动，松手吸附到半小时</div>
+    <button class="btn primary block" data-act="time-ok">确定</button>
+  </div>`;
+}
+function orderRoute(order) {
+  const parse = (loc) => {
+    if (!loc || String(loc).indexOf(',') < 0) return null;
+    const p = String(loc).split(',').map(Number);
+    if (!isFinite(p[0]) || !isFinite(p[1])) return null;
+    return { lng: p[0], lat: p[1] };
+  };
+  const a = parse(order && order.originLoc);
+  const b = parse(order && order.destLoc);
+  if (a && b) return [a, { lng: (a.lng * 2 + b.lng) / 3, lat: (a.lat * 2 + b.lat) / 3 }, b];
+  return [
+    { lng: 114.0552, lat: 22.5216 },
+    { lng: 114.085, lat: 22.455 },
+    { lng: 114.1577, lat: 22.285 }
+  ];
+}
+function projectRoute(points, p) {
+  let minLng = 1e9, maxLng = -1e9, minLat = 1e9, maxLat = -1e9;
+  points.forEach((pt) => {
+    minLng = Math.min(minLng, pt.lng); maxLng = Math.max(maxLng, pt.lng);
+    minLat = Math.min(minLat, pt.lat); maxLat = Math.max(maxLat, pt.lat);
+  });
+  const dx = Math.max(0.02, maxLng - minLng);
+  const dy = Math.max(0.02, maxLat - minLat);
+  return {
+    x: (16 + ((p.lng - minLng) / dx) * 288).toFixed(1),
+    y: (164 - ((p.lat - minLat) / dy) * 140).toFixed(1)
+  };
+}
+function pointAlong(points, t) {
+  const n = points.length - 1;
+  const f = Math.max(0, Math.min(0.96, t)) * n;
+  const i = Math.min(n - 1, Math.floor(f));
+  const u = f - i;
+  return {
+    lng: points[i].lng + (points[i + 1].lng - points[i].lng) * u,
+    lat: points[i].lat + (points[i + 1].lat - points[i].lat) * u
+  };
+}
+function updateVehiclePosition(lat, lng) {
+  S.vehicleOverride = { lat: Number(lat), lng: Number(lng) };
+  const marker = document.getElementById('carMarker');
+  const order = S.order;
+  if (!marker || !order) return;
+  const route = orderRoute(order);
+  const p = projectRoute(route, S.vehicleOverride);
+  marker.setAttribute('transform', 'translate(' + p.x + ' ' + p.y + ')');
+}
+globalThis.updateVehiclePosition = updateVehiclePosition;
+function vehicleMap(order) {
+  const idx = stageOf(order);
+  if (idx < 4) return '';
+  const live = idx === 4;
+  const route = orderRoute(order);
+  const pos = S.vehicleOverride || pointAlong(route, S.vehicleT == null ? 0.46 : S.vehicleT);
+  const pts = route.map((p) => projectRoute(route, p));
+  const car = projectRoute(route, pos);
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + p.x + ' ' + p.y).join(' ');
+  const fromName = (order && (order.origin || order.direction)) || '出发地';
+  const toName = (order && order.destination) || '目的地';
+  return `<section class="live-map" id="vehicleMap">
+    <svg viewBox="0 0 320 180" role="img" aria-label="车辆实时位置演示">
+      <rect width="320" height="180" fill="#d5e3ea"/>
+      <path d="M0 40 C40 20 80 70 140 50 C200 30 230 80 320 60 L320 0 L0 0 Z" fill="#c5d7e4"/>
+      <path d="M0 150 C60 130 120 170 180 150 C230 135 270 160 320 148 L320 180 L0 180 Z" fill="#b7cddd"/>
+      <path d="M10 30 H300 M20 90 H290 M40 20 V160 M150 16 V168 M250 24 V156" stroke="#f7f4ee" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="${d}" fill="none" stroke="#1a2c3f" stroke-width="3" stroke-dasharray="7 5"/>
+      <circle cx="${pts[0].x}" cy="${pts[0].y}" r="5" fill="#856128"/>
+      <circle cx="${pts[pts.length - 1].x}" cy="${pts[pts.length - 1].y}" r="5" fill="#1a2c3f"/>
+      <g id="carMarker" transform="translate(${car.x} ${car.y})">
+        <rect x="-11" y="-7" width="22" height="14" rx="4" fill="#1d3348"/>
+        <rect x="-7" y="-4" width="8" height="5" rx="1" fill="#e7d3aa"/>
+      </g>
+    </svg>
+    <div class="cap">
+      <b>${live ? '<i class="live-dot"></i>车辆实时位置（演示）· 约每 15 秒刷新' : '车辆位置已停更（演示）'}</b>
+      <span>${esc(fromName)} → ${esc(toName)} · 约 18 分钟后到达</span>
+    </div>
+  </section>`;
+}
+function syncVehicleTicker() {
+  const live = S.order && stageOf(S.order) === 4 && (S.view === 'order' || S.view === 'done');
+  if (!live) {
+    if (vehicleTick) { clearInterval(vehicleTick); vehicleTick = null; }
+    return;
+  }
+  if (vehicleTick) return;
+  if (S.vehicleT == null) S.vehicleT = 0.46;
+  vehicleTick = setInterval(() => {
+    if (!S.order || stageOf(S.order) !== 4) return;
+    S.vehicleOverride = null;
+    S.vehicleT = ((S.vehicleT || 0.46) + 0.08) % 0.9;
+    const box = document.getElementById('vehicleMap');
+    if (box) box.outerHTML = vehicleMap(S.order);
+  }, 15000);
+}
+let vehicleTick = null;
 
 function viewMe() {
   const orders = loadOrders();
@@ -2212,6 +2332,7 @@ function viewOrder() {
     : `<section class="block"><div class="block-head"><h2>履约沟通</h2></div><p class="muted">付款经客服确认后，这里会出现企微入口，方便建沟通群。</p></section>`;
   return `<div class="view">
     ${fulfillTimeline(o)}
+    ${vehicleMap(o)}
     ${demoControls(o)}
     ${orderSummary(o)}
     ${payDeclareBlock(o)}
@@ -2239,6 +2360,7 @@ function successView() {
     ${quoteNote}
     ${orderSummary(o)}
     ${fulfillTimeline(o)}
+    ${vehicleMap(o)}
     ${demoControls(o)}
     ${payDeclareBlock(o)}
     <div class="reminder">${REMINDER}</div>
@@ -2337,7 +2459,7 @@ function render() {
   else if (S.view === 'done') main.innerHTML = successView();
   else main.innerHTML = viewHome();
   const sheetHost = $('#sheet');
-  if (sheetHost) sheetHost.innerHTML = sheetView() + amapSheet() + zoomView();
+  if (sheetHost) sheetHost.innerHTML = sheetView() + amapSheet() + timeSheet() + zoomView();
   main.scrollTop = keepScroll;
   render.last = S.view;
   render.step = S.step;
@@ -2397,6 +2519,8 @@ function submitCharter() {
     destination: d.destPlace ? d.destPlace.name : '',
     originAddr: d.originPlace ? d.originPlace.addr : '',
     destAddr: d.destPlace ? d.destPlace.addr : '',
+    originLoc: d.originPlace ? d.originPlace.loc || '' : '',
+    destLoc: d.destPlace ? d.destPlace.loc || '' : '',
     when: `${d.date} ${d.time}`, pax: d.pax || 1, childseat: !!d.childseat,
     bags: d.bags == null ? 1 : d.bags,
     price: quoteByArea(d.originArea, d.destArea),
@@ -2410,11 +2534,12 @@ function submitCharter() {
 
 function submitNowIntent() {
   const place = S.now.fromPlace;
-  const dest = (($('#nowDest') || {}).value || S.now.dest || '');
+  const destPlace = S.now.toPlace;
   const date = (($('#nowDate') || {}).value || '').trim();
-  const time = (($('#nowTime') || {}).value || '').trim();
+  const time = (S.now.time || '').trim();
   const phone = (($('#nowPhone') || {}).value || '').trim();
   if (!place || !place.name) return toast('请用高德选点选择出发地');
+  if (!destPlace || !destPlace.name) return toast('请用高德选点选择目的地');
   if (!date) return toast('请选择用车日期');
   if (date < hkToday()) return toast('用车日期不能早于今天');
   if (!time) return toast('请选择出发时间');
@@ -2424,7 +2549,10 @@ function submitNowIntent() {
     id: newOrderId('YX'), type: '立即用车',
     origin: place.name,
     originAddr: place.addr || '',
-    destination: districtLabel(dest) || dest || '待沟通',
+    originLoc: place.loc || '',
+    destination: destPlace.name,
+    destAddr: destPlace.addr || '',
+    destLoc: destPlace.loc || '',
     when: date + ' ' + time, phone: phone.replace(/\s+/g, ''), pax: 1, price: null,
     stage: 0, status: '已登记', paidDeclared: false, personalWechat: '',
     createdAt: new Date().toISOString()
@@ -2652,6 +2780,7 @@ function initDateRail() {
 function afterRender() {
   initWheel();
   initDateRail();
+  syncVehicleTicker();
 }
 
 /* actions */
@@ -2694,7 +2823,7 @@ function charterFormNext() {
   if (!d.destPlace) return toast('请选择目的地');
   if (!d.date) return toast('请选择用车日期');
   if (parseISO(d.date) < startOfDay(new Date())) return toast('用车日期不能早于今天');
-  if (!d.time) return toast('请选择具体时间');
+  if (!d.time) d.time = '08:00';
   S.step = 1;
   render();
 }
@@ -2716,20 +2845,33 @@ document.addEventListener('click', (e) => {
   if (act === 'call') { location.href = 'tel:' + CONFIG.contact.phone; return; }
   if (act === 'paytab') { S.payTab = val; render(); return; }
   if (act === 'now-open') {
-    S.now = { dest: 'HK_YTM', status: 'idle', result: null, fromPlace: null, date: hkToday(), time: hkNextHalfHour(), phone: '' };
+    S.now = { status: 'idle', result: null, fromPlace: null, toPlace: null, date: hkToday(), time: hkNextHalfHour(), phone: '' };
     S.view = 'now';
+    render();
+    return;
+  }
+  if (act === 'open-time') {
+    S.timeTarget = val || 'charter';
+    S.timeDraft = S.timeTarget === 'now' ? (S.now.time || hkNextHalfHour()) : (S.draft.time || '08:00');
+    S.sheet = 'time';
+    render();
+    return;
+  }
+  if (act === 'time-ok') {
+    const wheel = document.getElementById('timeWheel');
+    const v = (wheel && wheel.dataset.value) || S.timeDraft || '08:00';
+    if (S.timeTarget === 'now') S.now.time = v;
+    else S.draft.time = v;
+    S.sheet = null;
     render();
     return;
   }
   if (act === 'open-amap') {
     const phone = document.getElementById('nowPhone');
     const date = document.getElementById('nowDate');
-    const time = document.getElementById('nowTime');
-    const dest = document.getElementById('nowDest');
     if (phone) S.now.phone = phone.value;
     if (date && date.value) S.now.date = date.value;
-    if (time && time.value) S.now.time = time.value;
-    if (dest) S.now.dest = dest.value;
+    S.amapFor = val === 'to' ? 'to' : 'from';
     S.sheet = 'amap';
     S.amapQ = '';
     S.amapSearching = false;
@@ -2740,14 +2882,17 @@ document.addEventListener('click', (e) => {
   if (act === 'amap-pick') {
     const place = (S.amapResults || [])[Number(val)];
     if (!place) return;
-    S.now.fromPlace = { name: place.name, addr: place.addr || '', cat: place.cat || guessArea(place), loc: place.loc || '' };
+    const picked = { name: place.name, addr: place.addr || '', cat: place.cat || guessArea(place), loc: place.loc || '' };
+    if (S.amapFor === 'to') S.now.toPlace = picked;
+    else S.now.fromPlace = picked;
     S.sheet = null;
     render();
     return;
   }
   if (act === 'amap-geo') {
     const apply = (place, note) => {
-      S.now.fromPlace = place;
+      if (S.amapFor === 'to') S.now.toPlace = place;
+      else S.now.fromPlace = place;
       S.sheet = null;
       render();
       if (note) toast(note);
