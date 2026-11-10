@@ -826,7 +826,13 @@ const BRAND = { zh: '方行深港', en: 'FONGGO', tag: '深港通勤 · 点对�
 const CONFIG = {
   contact: { wechat: '13930365066', phone: '13930365066', note: '电话可直接拨打。建群请优先加企微客服，不必先留个人微信。' },
   /* 企微「联系我」二维码：把图片放到同目录后把文件名填进来。留空则显示占位。 */
-  wecom: { qr: 'assets/wecom-contact-qr.png', name: '方皓泽', role: 'FongGo客服' },
+  wecom: {
+    qr: 'assets/wecom-contact-qr.png',
+    name: '方皓泽',
+    role: 'FongGo客服',
+    /* 由 assets/wecom-contact-qr.png 解码，企业微信「联系我」 */
+    link: 'https://work.weixin.qq.com/u/vc9ea100a3a848f64f?v=5.0.15.238710&bb=7ed6343a4d'
+  },
   /* 高德 Web 服务 Key（免费申请）：留空则用内置地点库 + 手动填写 */
   etaBuffer: 10,   // 给客户显示的提前量（分钟）
   amapKey: '6c4f2eb85f1aaf8f79d21b75601e8eef',
@@ -1407,6 +1413,30 @@ function demoControls(order) {
     </div>
   </section>`;
 }
+function focusWecomQr() {
+  const gate = document.getElementById('wecomGate');
+  if (gate && gate.scrollIntoView) gate.scrollIntoView({ block: 'center' });
+}
+function openWecomContact() {
+  const url = (CONFIG.wecom && CONFIG.wecom.link) || '';
+  if (!url) {
+    focusWecomQr();
+    toast('请长按上方二维码识别，添加企业微信。');
+    return;
+  }
+  if (IS_WECHAT) {
+    location.href = url;
+    return;
+  }
+  let opened = null;
+  try { opened = window.open(url, '_blank'); } catch (err) { opened = null; }
+  if (!opened) {
+    focusWecomQr();
+    toast('当前浏览器打不开微信。请长按本页二维码识别，添加企业微信。');
+    return;
+  }
+  toast('若没有进入添加联系人，请回到本页长按二维码识别。');
+}
 function wecomBlock(order, opts) {
   const qr = (CONFIG.wecom && CONFIG.wecom.qr) || '';
   const compact = !!(opts && opts.compact);
@@ -1424,7 +1454,7 @@ function wecomBlock(order, opts) {
       ? '长按二维码识别，添加企业微信。确认后由客服发收款说明；余位以确认为准。'
       : '长按二维码识别，添加企业微信。确认后由客服发收款说明；余位以确认为准。'}</p>
     ${compact
-      ? `<a class="btn primary block" href="tel:${CONFIG.contact.phone}">添加企微客服（推荐，便于建沟通群）</a>`
+      ? `<button class="btn primary block" type="button" data-act="wecom-add">添加企微客服（推荐，便于建沟通群）</button>`
       : `<a class="btn primary block" href="tel:${CONFIG.contact.phone}">电话联系客服确认付款</a>
          <div style="text-align:center"><button class="link" data-act="copy-wx">复制客服号 ${esc(CONFIG.contact.phone)}</button></div>`}
   </section>`;
@@ -2439,12 +2469,12 @@ function successView() {
     ${demoControls(o)}
     <div class="reminder">${REMINDER}</div>
     <div style="text-align:center"><button class="link" data-act="open-terms">查看退改与免责条款</button></div>
-    <div class="seg">
+    ${o.type === '通勤班车' ? '' : `<div class="seg">
       <button data-act="copy-order" data-val="${esc(o.id)}">复制意向号</button>
       <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">电话客服</a>
     </div>
     <button class="btn ghost block" data-act="open-progress">在预约详情里看进度</button>
-    <button class="btn ghost block" data-act="tab" data-val="me">我的预约</button>
+    <button class="btn ghost block" data-act="tab" data-val="me">我的预约</button>`}
     <button class="btn ghost block" data-act="go" data-val="home">回首页</button>
   </div>`;
 }
@@ -3035,16 +3065,7 @@ document.addEventListener('click', (e) => {
   if (act === 'now-back') { S.view = 'home'; render(); return; }
   if (act === 'now-submit') { submitNowIntent(); return; }
   if (act === 'now-go' || act === 'now-pay') { toast('请先提交用车意向，由客服确认后再安排'); return; }
-  if (act === 'wecom-add') {
-    const gate = document.getElementById('wecomGate');
-    if (gate && gate.scrollIntoView) {
-      gate.scrollIntoView({ block: 'start' });
-      toast('请长按上方二维码识别，添加企业微信。');
-      return;
-    }
-    go('home');
-    return;
-  }
+  if (act === 'wecom-add') { openWecomContact(); return; }
   if (act === 'sync-retry') {
     const found = loadOrders().find((x) => x.id === val) || (S.order && S.order.id === val ? S.order : null);
     if (!found) return toast('找不到这条例意向');
