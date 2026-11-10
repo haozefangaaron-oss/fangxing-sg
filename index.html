@@ -778,6 +778,7 @@
     border-radius: 12px; background: #fff; border: 1px solid var(--line);
     padding: 8px; display: grid; place-items: center; overflow: hidden;
   }
+  .wecom.compact .wecom-qr { width: 168px; }
   .wecom-qr img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
   .wecom-qr .ph { display: none; text-align: center; font-size: 12px; color: var(--muted); line-height: 1.45; padding: 12px; }
   .wecom-qr.missing .ph { display: block; }
@@ -1309,12 +1310,13 @@ function demoControls(order) {
     </div>
   </section>`;
 }
-function wecomBlock(order) {
+function wecomBlock(order, opts) {
   const qr = (CONFIG.wecom && CONFIG.wecom.qr) || '';
   const saved = savedWx(order);
   const showForm = !!(S.showWxId || saved);
+  const compact = !!(opts && opts.compact);
   const qrHtml = `<div class="wecom-qr${qr ? '' : ' missing'}">${qr ? `<img src="${esc(qr)}" alt="方皓泽的企业微信二维码" onerror="this.parentNode.classList.add('missing')">` : ''}<div class="ph">企微码未加载</div></div>`;
-  return `<section class="wecom" id="wecomGate">
+  return `<section class="wecom${compact ? ' compact' : ''}" id="wecomGate">
     <div class="block-head"><h2>履约沟通</h2><span class="pill gold">企微优先</span></div>
     <div class="wecom-row">
       <div>
@@ -1454,14 +1456,14 @@ function viewHome() {
     <section class="hero">
       <div class="hero-kicker">方行深港 · FONGGO</div>
       <h1>你的下一程，也是我的下一程。</h1>
-      <p class="hero-lead">预约登记，人工确认。通勤班车与包车接送可以一起看，余位和车辆都等客服回你。</p>
+      <p class="hero-lead">专业、耐心、陪伴您的每段路</p>
     </section>
 
     <section class="peers" aria-label="预约入口">
       <div class="peer navy">
         <span class="peer-kicker">通勤班车</span>
         <span class="peer-title">福田 ↔ 香港 IFC</span>
-        <span class="peer-sub">工作日 07:45 集合<br>返程 18:40</span>
+        <span class="peer-sub">07:45 福田站12出口到IFC<br>18:30 IFC—您温馨的家</span>
         <div class="peer-end">
           <span class="peer-foot"><b>¥108</b><em>起</em></span>
           <div class="peer-acts">
@@ -1473,7 +1475,7 @@ function viewHome() {
       <div class="peer gold">
         <span class="peer-kicker">包车 / 接送</span>
         <span class="peer-title">深港点对点</span>
-        <span class="peer-sub">时间与线路人工确认</span>
+        <span class="peer-sub">点对点服务</span>
         <div class="peer-end">
           <span class="peer-foot"><b>¥498</b><em>起</em></span>
           <div class="peer-acts">
@@ -1485,7 +1487,7 @@ function viewHome() {
     </section>
     ${S.showTrips ? `<div class="block"><div class="block-head"><h2>近期班次（参考）</h2><span class="muted">${next ? (soldOut ? '参考已满' : '参考余 ' + nextLeft + ' 座') : ''}</span></div>${tripRows(4)}<div class="muted" style="margin-top:8px">余位只是参考，以客服确认为准。</div></div>` : ''}
 
-    ${wecomBlock(null)}
+    ${wecomBlock(null, { compact: true })}
 
     <div class="fine">本页为预约登记工具，不代办港澳通行证、不审核签注；通关耗时受口岸排队影响，恕不承诺过关时长。你的下一程，也是我的下一程。</div>
   </div>`;
@@ -1568,7 +1570,7 @@ function busBody(key) {
         <div><b>去程 · 福田 → 香港IFC</b><small>福田站12号出口 7:45 集合 · 7:50 发车</small></div><span class="chev">›</span>
       </button>
       <button class="opt ${d.direction === '返程' ? 'on' : ''}" data-act="bus-dir" data-val="返程">
-        <div><b>返程 · 香港IFC → 深圳</b><small>IFC二期落客区 18:40 集合发车</small></div><span class="chev">›</span>
+        <div><b>返程 · 香港IFC → 深圳</b><small>IFC二期落客区 18:30 集合发车</small></div><span class="chev">›</span>
       </button>
     </div>`;
   }
@@ -1592,7 +1594,7 @@ function busBody(key) {
           <div class="tl-head"><b>—</b><span>—</span></div>
           <ol class="tl-list">
             ${(d.direction === '返程')
-              ? '<li><i></i><div><b>18:40</b> IFC 二期落客区集合发车</div></li><li><i></i><div><b>过关</b> 皇岗口岸，耗时以现场为准</div></li><li><i></i><div><b>送达</b> 口岸或家门口，以确认为准</div></li>'
+              ? '<li><i></i><div><b>18:30</b> IFC 二期落客区集合发车</div></li><li><i></i><div><b>过关</b> 皇岗口岸，耗时以现场为准</div></li><li><i></i><div><b>送达</b> 口岸或家门口，以确认为准</div></li>'
               : '<li><i></i><div><b>7:45</b> 福田站 12 号出口集合</div></li><li><i></i><div><b>7:50</b> 准时发车，过皇岗口岸</div></li><li><i></i><div><b>≈8:40</b> 香港 IFC 二期落客</div></li>'}
           </ol>
         </div>
@@ -1654,7 +1656,7 @@ function busBody(key) {
     const rows = [['业务', '工作日通勤班车 · ' + d.direction], ['日期', `${d.date}（${WD[date.getDay()]}）`]];
     if (d.direction === '去程') rows.push(['集合', '福田站12号出口 · 7:45 集合 · 7:50 发车']);
     else {
-      rows.push(['集合', 'IFC二期落客区 · 18:40 集合发车']);
+      rows.push(['集合', 'IFC二期落客区 · 18:30 集合发车']);
       rows.push(['送达', d.dropoff === '家门口' && d.homePlace
         ? '家门口 · ' + d.homePlace.name + (d.homePlace.addr ? '（' + d.homePlace.addr + '）' : '')
         : d.dropoff]);
@@ -1957,7 +1959,7 @@ function viewPrice() {
       <div class="rows">
         <div class="row"><span>去程</span><b>福田站12号出口 7:45 → 7:50 发车</b></div>
         <div class="row"><span>落客</span><b>IFC 二期</b></div>
-        <div class="row"><span>返程</span><b>IFC 二期 18:40 → 皇岗口岸 / 家门口</b></div>
+        <div class="row"><span>返程</span><b>IFC 二期 18:30 → 皇岗口岸 / 家门口</b></div>
       </div>
       <div class="fares">
         <span><b>副驾</b>¥118</span>
@@ -1966,8 +1968,7 @@ function viewPrice() {
         <span><b>月票</b>¥2400<i>/月</i></span>
       </div>
       <div class="muted" style="margin-top:10px;line-height:1.8">
-        每车限载 5 人；周末及公众假期停运；报名与预付截止为乘车前一日 20:00。<br>
-        退票：20:00 前可正常退款；20:00 后不直接退款，仅开放候补——有人成功候补才退款，无人候补不退款。
+        提供五个位置；按香港工作日安排。
       </div>
     </div>
 
@@ -2244,7 +2245,6 @@ function viewMe() {
       </div>
     </div>
 
-    ${wecomBlock(null)}
     <div class="block">
       <div class="block-head"><h2>电话</h2></div>
       <div class="rows">
@@ -2371,6 +2371,7 @@ function successView() {
     ${payGuide()}
     ${wecomBlock(o)}
     <div class="reminder">确认后由客服发收款说明；余位以确认为准。</div>
+    ${o.type === '通勤班车' ? `<div class="reminder">报名与预付截止为乘车前一日 20:00。退票：20:00 前可正常退款；20:00 后不直接退款，仅开放候补——有人成功候补才退款，无人候补不退款。</div>` : ''}
     ${quoteNote}
     ${orderSummary(o)}
     ${fulfillTimeline(o)}
