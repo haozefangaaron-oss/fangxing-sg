@@ -228,7 +228,11 @@
     height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line);
     background: var(--card); font-size: 15px; color: var(--ink); outline: none; width: 100%;
   }
-  .field input:focus, .field select:focus { border-color: rgba(26,44,63,.34); box-shadow: 0 0 0 3px rgba(26,44,63,.07); }
+  .field textarea {
+    min-height: 84px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line);
+    background: var(--card); font: inherit; color: var(--ink); outline: none; width: 100%; resize: vertical;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(26,44,63,.34); box-shadow: 0 0 0 3px rgba(26,44,63,.07); }
   .field select { height: 44px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); font-size: 14px; width: 100%; }
   .field-row { display: flex; gap: 8px; align-items: stretch; }
   .field-row input {
@@ -321,7 +325,26 @@
   }
   .tabs button { border: 0; background: transparent; cursor: pointer; padding: 8px 0 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: #8b8478; font-size: 11px; letter-spacing: .02em; }
   .tabs button .ico { width: 21px; height: 21px; }
-  .tabs button.on { color: var(--brand); }
+  .tabs button.on { color: var(--brand); box-shadow: inset 0 -2px 0 #c4a36a; }
+  .trust { display: flex; flex-wrap: wrap; gap: 8px; }
+  .trust span {
+    font-size: 12px; letter-spacing: .06em; color: var(--brand);
+    background: var(--card); border: 1px solid rgba(133,97,40,.32);
+    border-radius: 999px; padding: 5px 11px;
+  }
+  .seg.trip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .air-picks { display: flex; flex-wrap: wrap; gap: 8px; }
+  .air-picks button {
+    border: 1px solid var(--line); background: var(--card); color: var(--brand);
+    border-radius: 999px; padding: 7px 10px; font-size: 12.5px; cursor: pointer;
+  }
+  .air-picks button.on { border-color: var(--brand); background: var(--brand-soft); font-weight: 650; }
+  .quote-ref { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .quote-ref b { font-size: 28px; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .quote-ref b span { font-size: 13px; font-weight: 650; margin-left: 2px; }
+  .quote-lines { margin: 0; font-size: 12px; line-height: 1.65; color: var(--muted); }
+  .consult-bar { display: flex; flex-direction: column; gap: 8px; }
+  .consult-help { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
   .stepper { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
   .stepper .label { font-size: 14px; }
@@ -1497,7 +1520,7 @@ function requireConsent() {
 function renderTop() {
   const top = $('#top');
   if (S.view === 'order' || S.view === 'now') {
-    const title = S.view === 'order' ? '预约详情' : '立即咨询';
+    const title = S.view === 'order' ? '预约详情' : '预约咨询';
     const backAct = S.view === 'order' ? 'order-back' : 'now-back';
     top.style.setProperty('--tint', 0);
     top.innerHTML = `
@@ -1513,7 +1536,7 @@ function renderTop() {
   }
   if (S.view === 'bus' || S.view === 'charter') {
     const title = S.view === 'bus' ? '工作日通勤班车' : '预约咨询';
-    const sub = S.step > 0 ? '确认意向' : '填写预约';
+    const sub = S.view === 'charter' ? '预约登记 · 人工确认' : (S.step > 0 ? '确认意向' : '填写预约');
     top.style.setProperty('--tint', S.step > 0 ? 0.4 : 0);
     top.innerHTML = `
       <div class="flow-top">
@@ -1590,6 +1613,12 @@ function viewHome() {
       <h1>你的下一程，也是我的下一程。</h1>
       <p class="hero-lead">专业、耐心、陪伴您的每段路</p>
     </section>
+
+    <div class="trust" aria-label="服务说明">
+      <span>报价透明</span>
+      <span>人工确认</span>
+      <span>保护隐私</span>
+    </div>
 
     <section class="peers" aria-label="预约入口">
       <div class="peer navy">
@@ -2145,6 +2174,136 @@ function nowPlaceField(which) {
   }
   return `<button class="place-tap" data-act="open-amap" data-val="${which}" type="button"><span class="ph">${ph}</span></button>`;
 }
+const AIRPORTS = [
+  { name: '香港国际机场', addr: '香港赤鱲角', cat: 'HK_OTHER' },
+  { name: '深圳宝安机场', addr: '深圳市宝安区', cat: 'SZ_AIRPORT' },
+  { name: '广州白云国际机场', addr: '广州市白云区', cat: 'OTHER' },
+  { name: '珠海金湾机场', addr: '珠海市金湾区', cat: 'OTHER' },
+  { name: '澳门国际机场', addr: '澳门氹仔', cat: 'OTHER' }
+];
+function blankConsult() {
+  return {
+    trip: '单程', date: hkToday(), time: hkNextHalfHour(), landTime: '',
+    fromPlace: null, toPlace: null, flight: '',
+    adults: 1, children: 0, bags: 0, childseat: false,
+    name: '', phone: '', wx: '', remark: ''
+  };
+}
+function stashConsult() {
+  const c = S.consult;
+  if (!c) return;
+  const read = (id) => { const el = document.getElementById(id); return el ? el.value : null; };
+  const date = read('consultDate'); if (date != null) c.date = date;
+  const name = read('consultName'); if (name != null) c.name = name;
+  const phone = read('consultPhone'); if (phone != null) c.phone = phone;
+  const wx = read('consultWx'); if (wx != null) c.wx = wx;
+  const flight = read('consultFlight'); if (flight != null) c.flight = flight;
+  const remark = read('consultRemark'); if (remark != null) c.remark = remark;
+}
+function consultPlace(which) {
+  const c = S.consult || {};
+  const p = which === 'to' ? c.toPlace : c.fromPlace;
+  const ph = which === 'to' ? '高德选点 · 终点详细地址' : '高德选点 · 起点详细地址';
+  if (p && p.name) {
+    return `<button class="place-tap" data-act="open-amap" data-val="${which}" type="button">
+      <b>${esc(p.name)}</b><small>${esc(p.addr || '')}</small><small>重选 · 高德选点</small>
+    </button>`;
+  }
+  return `<button class="place-tap" data-act="open-amap" data-val="${which}" type="button"><span class="ph">${ph}</span></button>`;
+}
+function consultStep(key, label, sub, value, min) {
+  const c = S.consult;
+  const other = key === 'adults' ? c.children : (key === 'children' ? c.adults : 0);
+  const maxed = key === 'bags' ? value >= 5 : (value + other >= 5);
+  return `<div class="stepper">
+    <div class="label">${label}<small>${sub}</small></div>
+    <div class="ctrl">
+      <button type="button" data-act="consult-n" data-key="${key}" data-val="-1" ${value <= min ? 'disabled' : ''}>−</button>
+      <span>${value}</span>
+      <button type="button" data-act="consult-n" data-key="${key}" data-val="1" ${maxed ? 'disabled' : ''}>+</button>
+    </div>
+  </div>`;
+}
+function viewConsult() {
+  if (!S.consult) S.consult = blankConsult();
+  const c = S.consult;
+  const airportSide = c.trip === '送机' ? '终点' : '起点';
+  const airports = (c.trip === '单程') ? '' : `<div class="form-sec">
+      <h2>${c.trip === '送机' ? '送机机场' : '接机机场'}</h2>
+      <p>点一下填入${airportSide}，也可以再改详细地址。</p>
+      <div class="air-picks">${AIRPORTS.map((a, i) => {
+        const picked = (c.trip === '送机' ? c.toPlace : c.fromPlace);
+        const on = picked && picked.name === a.name ? ' on' : '';
+        return `<button type="button" class="${on}" data-act="consult-air" data-val="${i}">${a.name}</button>`;
+      }).join('')}</div>
+    </div>`;
+  const flight = c.trip === '接机' ? `<div class="form-sec">
+      <h2>航班</h2>
+      <label class="field"><span>航班号</span><input id="consultFlight" maxlength="12" placeholder="例如 CX346" value="${esc(c.flight || '')}"></label>
+      <div class="field"><span>落地时间</span>
+        <button type="button" class="time-field" data-act="open-time" data-val="consult-land">${esc(c.landTime || '选择落地时间')}</button>
+      </div>
+    </div>` : '';
+  return `<div class="view consult">
+    <div class="step-head"><h2>预约咨询</h2><p>先登记行程。车辆、时间和报价都等客服确认，这里不是下单。</p></div>
+    <div class="trust"><span>报价透明</span><span>人工确认</span><span>保护隐私</span></div>
+    <div class="seg trip">
+      ${['单程', '接机', '送机'].map((t) => `<button type="button" class="${c.trip === t ? 'on' : ''}" data-act="consult-trip" data-val="${t}">${t}</button>`).join('')}
+    </div>
+    <section class="form-sec">
+      <h2>时间</h2>
+      <label class="field"><span>日期</span><input type="date" id="consultDate" min="${hkToday()}" value="${esc(c.date || '')}"></label>
+      <div class="field"><span>时间</span>
+        <button type="button" class="time-field" data-act="open-time" data-val="consult">${esc(c.time || '选择时间')}</button>
+      </div>
+    </section>
+    <section class="form-sec">
+      <h2>行程</h2>
+      <div class="field"><span>起点</span>${consultPlace('from')}</div>
+      <div class="field"><span>终点</span>${consultPlace('to')}</div>
+      <p class="consult-note">如有多个上下车点，请联系客服。</p>
+    </section>
+    ${airports}
+    ${flight}
+    <section class="form-sec">
+      <h2>人数与行李</h2>
+      <p>这辆车提供五个位置。成人和儿童加起来不超过 5 人。</p>
+      ${consultStep('adults', '成人', '至少 1 人', c.adults || 1, 1)}
+      ${consultStep('children', '儿童', '计入五个位置', c.children || 0, 0)}
+      ${consultStep('bags', '行李', '件数，最多 5', c.bags || 0, 0)}
+      <div class="seg">
+        <button type="button" class="${c.childseat ? 'on' : ''}" data-act="consult-child" data-val="1">需要儿童座椅</button>
+        <button type="button" class="${!c.childseat ? 'on' : ''}" data-act="consult-child" data-val="0">不需要</button>
+      </div>
+      <p class="consult-note">儿童座椅只是咨询项，不在这里加价或结算。</p>
+    </section>
+    <section class="form-sec">
+      <h2>联系人</h2>
+      <label class="field"><span>姓名</span><input id="consultName" maxlength="20" placeholder="怎么称呼你" value="${esc(c.name || '')}"></label>
+      <label class="field"><span>电话</span><input id="consultPhone" inputmode="tel" maxlength="20" placeholder="方便客服回你" value="${esc(c.phone || '')}"></label>
+      <label class="field"><span>微信号</span><input id="consultWx" maxlength="30" placeholder="选填，方便建群时联系" value="${esc(c.wx || '')}"></label>
+      <button type="button" class="btn ghost small" data-act="consult-samewx">手机同号</button>
+    </section>
+    <section class="form-sec">
+      <h2>备注</h2>
+      <label class="field"><span>其他说明</span><textarea id="consultRemark" maxlength="120" rows="3" placeholder="例如指定时间、行李尺寸">${esc(c.remark || '')}</textarea></label>
+      <p class="consult-note">择优安排口岸，如需指定口岸请备注或联系客服。</p>
+    </section>
+    <section class="block">
+      <div class="quote-ref"><span>参考报价</span><b>¥498<span>起</span></b></div>
+      <p class="quote-lines">一口价明细：机场/宝安龙岗↔港岛 658、↔九龙 598；市区（福田、罗湖、南山、龙华等）↔港岛 598、↔九龙 498；反向同价；深圳→香港迪士尼 498。这是参考报价，不是锁定总价。未覆盖的线路和附加费，以客服确认为准。</p>
+      <div style="margin-top:8px"><button type="button" class="link" data-act="open-terms">查看退改规则</button></div>
+    </section>
+    ${consentField()}
+    <div class="consult-bar">
+      <button class="btn primary block" type="button" data-act="consult-submit" ${S.consent ? '' : 'disabled'}>提交咨询</button>
+      <div class="consult-help">
+        <a class="btn ghost" href="tel:${CONFIG.contact.phone}">联系客服</a>
+        <button class="btn ghost" type="button" data-act="wecom-add">添加企微</button>
+      </div>
+    </div>
+  </div>`;
+}
 function viewNow() {
   const phone = S.now.phone || lastPax().phone || '';
   const date = S.now.date || hkToday();
@@ -2316,13 +2475,14 @@ function viewMe() {
         <p>班车与包车都可以先登记。提交后由客服确认余位和车辆。</p>
         <div class="empty-act">
           <button class="btn primary" data-act="go" data-val="bus">登记班车</button>
-          <button class="btn ghost" data-act="go" data-val="charter">登记包车</button>
+          <button class="btn ghost" data-act="go" data-val="charter">预约咨询</button>
         </div>
       </div>`;
   return `
   <div class="view">
     <div class="block">
       <div class="block-head"><h2>我的预约</h2><span class="muted">${orders.length} 条</span></div>
+      <div class="trust" style="margin:10px 0"><span>报价透明</span><span>人工确认</span><span>保护隐私</span></div>
       <div class="muted">先记在本机。显示「已提交」才表示送到了客服端。余位与车辆以客服确认为准。点「履约进度」可以看时间轴。</div>
       ${list}
       ${orders.length ? '<button class="btn ghost block small" style="margin-top:12px" data-act="clear-orders">清除本机记录</button>' : ''}
@@ -2513,9 +2673,8 @@ function refundSheet() {
 function sheetView() {
   if (S.sheet === 'privacy') return privacySheet();
   if (S.sheet === 'refund') return refundSheet();
-  if (S.sheet !== 'terms' || !S.order) return '';
+  if (S.sheet !== 'terms') return '';
   const o = S.order;
-  const amount = o.price == null ? '待报价' : '¥' + o.price;
   return `
   <div class="mask" data-act="close-sheet"></div>
   <div class="sheet" role="dialog" aria-modal="true" aria-label="退改政策与免责声明">
@@ -2571,7 +2730,7 @@ function render() {
   renderTop();
   renderTabs();
   if (S.view === 'bus') main.innerHTML = viewBus();
-  else if (S.view === 'charter') main.innerHTML = viewCharter();
+  else if (S.view === 'charter' || S.view === 'now') main.innerHTML = viewConsult();
   else if (S.view === 'login') main.innerHTML = viewLogin();
   else if (S.view === 'price') main.innerHTML = viewPrice();
   else if (S.view === 'me') main.innerHTML = viewMe();
@@ -2591,6 +2750,7 @@ function render() {
 function go(view) {
   S.view = view; S.step = 0; S.draft = {}; S.order = null; S.q = ''; S.results = []; S.consent = false; S.sheet = null;
   if (view === 'pay') view = 'home';
+  if (view === 'charter' || view === 'now') S.consult = blankConsult();
   if (['home', 'price', 'me'].includes(view)) S.tab = view;
   render();
 }
@@ -2634,6 +2794,45 @@ function submitBus() {
   syncOrder(order);
 }
 
+function submitConsult() {
+  if (!requireConsent()) return;
+  stashConsult();
+  const c = S.consult || blankConsult();
+  if (!c.fromPlace || !c.fromPlace.name) return toast('请选择起点');
+  if (!c.toPlace || !c.toPlace.name) return toast('请选择终点');
+  if (!c.date) return toast('请选择日期');
+  if (c.date < hkToday()) return toast('日期不能早于今天');
+  if (!c.time) return toast('请选择时间');
+  if (c.trip === '接机') {
+    if (!String(c.flight || '').trim()) return toast('请填写航班号');
+    if (!c.landTime) return toast('请选择落地时间');
+  }
+  const name = String(c.name || '').trim();
+  const phone = String(c.phone || '').trim();
+  if (name.length < 1 || name.length > 20) return toast('请填写联系人姓名');
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 8 || digits.length > 15) return toast('请检查联系电话');
+  const pax = (c.adults || 1) + (c.children || 0);
+  if (pax < 1 || pax > 5) return toast('这辆车提供五个位置');
+  const order = {
+    id: newOrderId('PV'), type: '预约咨询', trip: c.trip,
+    origin: c.fromPlace.name, originAddr: c.fromPlace.addr || '', originLoc: c.fromPlace.loc || '',
+    destination: c.toPlace.name, destAddr: c.toPlace.addr || '', destLoc: c.toPlace.loc || '',
+    when: c.date + ' ' + c.time,
+    flight: c.trip === '接机' ? String(c.flight).trim() : '',
+    landTime: c.trip === '接机' ? c.landTime : '',
+    pax: pax, adults: c.adults || 1, children: c.children || 0, bags: c.bags || 0,
+    childseat: !!c.childseat, name: name, phone: phone.replace(/\s+/g, ''),
+    wechat: String(c.wx || '').trim(), remark: String(c.remark || '').trim(),
+    price: null, stage: 0, status: '已登记', sync: 'syncing',
+    paidDeclared: false, personalWechat: String(c.wx || '').trim(),
+    createdAt: new Date().toISOString()
+  };
+  saveOrder(order);
+  rememberPax({ name: name, phone: order.phone });
+  openSuccess(order);
+  syncOrder(order);
+}
 function submitCharter() {
   if (!requireConsent()) return;
   const d = S.draft;
@@ -2920,6 +3119,7 @@ function stashLive() {
   if (wheel && wheel.dataset.value) S.draft.time = wheel.dataset.value;
   const other = document.getElementById('otherDate');
   if (other && other.value) S.draft.otherDate = other.value;
+  stashConsult();
 }
 function busFormNext() {
   stashLive();
@@ -3002,14 +3202,64 @@ document.addEventListener('click', (e) => {
   if (act === 'copy-order') return copy(val);
   if (act === 'call') { location.href = 'tel:' + CONFIG.contact.phone; return; }
   if (act === 'now-open') {
-    S.now = { status: 'idle', result: null, fromPlace: null, toPlace: null, date: hkToday(), time: hkNextHalfHour(), phone: '' };
+    S.consult = blankConsult();
+    S.consent = false;
     S.view = 'now';
     render();
     return;
   }
+  if (act === 'consult-trip') {
+    if (!S.consult) S.consult = blankConsult();
+    S.consult.trip = val;
+    render();
+    return;
+  }
+  if (act === 'consult-air') {
+    const a = AIRPORTS[Number(val)];
+    if (!a || !S.consult) return;
+    const place = { name: a.name, addr: a.addr, cat: a.cat, loc: '' };
+    if (S.consult.trip === '送机') S.consult.toPlace = place;
+    else S.consult.fromPlace = place;
+    render();
+    return;
+  }
+  if (act === 'consult-n') {
+    const c = S.consult;
+    if (!c) return;
+    const key = el.dataset.key;
+    const dir = Number(val);
+    if (key === 'bags') c.bags = Math.max(0, Math.min(5, (c.bags || 0) + dir));
+    else {
+      const min = key === 'adults' ? 1 : 0;
+      const next = Math.max(min, (c[key] || 0) + dir);
+      const other = key === 'adults' ? (c.children || 0) : (c.adults || 1);
+      if (next + other > 5) return toast('这辆车提供五个位置');
+      c[key] = next;
+    }
+    render();
+    return;
+  }
+  if (act === 'consult-child') {
+    if (S.consult) S.consult.childseat = val === '1';
+    render();
+    return;
+  }
+  if (act === 'consult-samewx') {
+    stashConsult();
+    if (!S.consult) return;
+    const phone = String(S.consult.phone || '').trim();
+    if (!phone) return toast('请先填写电话');
+    S.consult.wx = phone;
+    render();
+    return;
+  }
+  if (act === 'consult-submit') return submitConsult();
   if (act === 'open-time') {
     S.timeTarget = val || 'charter';
-    S.timeDraft = S.timeTarget === 'now' ? (S.now.time || hkNextHalfHour()) : (S.draft.time || '08:00');
+    if (val === 'consult') S.timeDraft = (S.consult && S.consult.time) || hkNextHalfHour();
+    else if (val === 'consult-land') S.timeDraft = (S.consult && S.consult.landTime) || '08:00';
+    else if (val === 'now') S.timeDraft = (S.now && S.now.time) || hkNextHalfHour();
+    else S.timeDraft = S.draft.time || '08:00';
     S.sheet = 'time';
     render();
     return;
@@ -3017,7 +3267,9 @@ document.addEventListener('click', (e) => {
   if (act === 'time-ok') {
     const wheel = document.getElementById('timeWheel');
     const v = (wheel && wheel.dataset.value) || S.timeDraft || '08:00';
-    if (S.timeTarget === 'now') S.now.time = v;
+    if (S.timeTarget === 'consult' && S.consult) S.consult.time = v;
+    else if (S.timeTarget === 'consult-land' && S.consult) S.consult.landTime = v;
+    else if (S.timeTarget === 'now' && S.now) S.now.time = v;
     else S.draft.time = v;
     S.sheet = null;
     render();
@@ -3040,16 +3292,18 @@ document.addEventListener('click', (e) => {
     const place = (S.amapResults || [])[Number(val)];
     if (!place) return;
     const picked = { name: place.name, addr: place.addr || '', cat: place.cat || guessArea(place), loc: place.loc || '' };
-    if (S.amapFor === 'to') S.now.toPlace = picked;
-    else S.now.fromPlace = picked;
+    const bag = S.consult && (S.view === 'now' || S.view === 'charter') ? S.consult : S.now;
+    if (S.amapFor === 'to') bag.toPlace = picked;
+    else bag.fromPlace = picked;
     S.sheet = null;
     render();
     return;
   }
   if (act === 'amap-geo') {
     const apply = (place) => {
-      if (S.amapFor === 'to') S.now.toPlace = place;
-      else S.now.fromPlace = place;
+      const bag = S.consult && (S.view === 'now' || S.view === 'charter') ? S.consult : S.now;
+      if (S.amapFor === 'to') bag.toPlace = place;
+      else bag.fromPlace = place;
       S.sheet = null;
       render();
     };
@@ -3283,7 +3537,7 @@ let searchSeq = 0;
 document.addEventListener('change', (e) => {
   if (e.target && e.target.id === 'consentBox') {
     S.consent = !!e.target.checked;
-    document.querySelectorAll('[data-act="bus-submit"],[data-act="charter-submit"],[data-act="now-submit"]').forEach((btn) => {
+    document.querySelectorAll('[data-act="bus-submit"],[data-act="charter-submit"],[data-act="now-submit"],[data-act="consult-submit"]').forEach((btn) => {
       btn.disabled = !S.consent;
     });
     return;
