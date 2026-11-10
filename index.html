@@ -830,7 +830,9 @@ const CONFIG = {
     qr: 'assets/wecom-contact-qr.png',
     name: '方皓泽',
     role: 'FongGo客服',
-    /* 由 assets/wecom-contact-qr.png 解码，企业微信「联系我」 */
+    /* 微信号后补。空着时不要拿手机号去复制。 */
+    wxid: '',
+    /* 由 assets/wecom-contact-qr.png 解码，企业微信「联系我」。主按钮目前按口令改为复制微信号，这条链接仍留着。 */
     link: 'https://work.weixin.qq.com/u/vc9ea100a3a848f64f?v=5.0.15.238710&bb=7ed6343a4d'
   },
   /* 高德 Web 服务 Key（免费申请）：留空则用内置地点库 + 手动填写 */
@@ -1442,7 +1444,6 @@ function wecomBlock(order, opts) {
   const compact = !!(opts && opts.compact);
   const qrHtml = `<div class="wecom-qr${qr ? '' : ' missing'}">${qr ? `<img src="${esc(qr)}" alt="方皓泽的企业微信二维码" onerror="this.parentNode.classList.add('missing')">` : ''}<div class="ph">企微码未加载</div></div>`;
   return `<section class="wecom${compact ? ' compact' : ''}" id="wecomGate">
-    <div class="block-head"><h2>履约沟通</h2><span class="pill gold">企微优先</span></div>
     <div class="wecom-row">
       <div>
         <b>${esc((CONFIG.wecom && CONFIG.wecom.name) || '方皓泽')}</b>
@@ -1450,11 +1451,9 @@ function wecomBlock(order, opts) {
       </div>
       ${qrHtml}
     </div>
-    <p class="wecom-cap">${compact
-      ? '长按二维码识别，添加企业微信。确认后由客服发收款说明；余位以确认为准。'
-      : '长按二维码识别，添加企业微信。确认后由客服发收款说明；余位以确认为准。'}</p>
+    <p class="wecom-cap">长按二维码识别，添加企业微信。</p>
     ${compact
-      ? `<button class="btn primary block" type="button" data-act="wecom-add">添加企微客服（推荐，便于建沟通群）</button>`
+      ? `<button class="btn primary block" type="button" data-act="copy-wecom-id">点击复制微信号</button>`
       : `<a class="btn primary block" href="tel:${CONFIG.contact.phone}">电话联系客服确认付款</a>
          <div style="text-align:center"><button class="link" data-act="copy-wx">复制客服号 ${esc(CONFIG.contact.phone)}</button></div>`}
   </section>`;
@@ -1498,7 +1497,7 @@ function requireConsent() {
 function renderTop() {
   const top = $('#top');
   if (S.view === 'order' || S.view === 'now') {
-    const title = S.view === 'order' ? '预约详情' : '立即用车';
+    const title = S.view === 'order' ? '预约详情' : '立即咨询';
     const backAct = S.view === 'order' ? 'order-back' : 'now-back';
     top.style.setProperty('--tint', 0);
     top.innerHTML = `
@@ -1513,7 +1512,7 @@ function renderTop() {
     return;
   }
   if (S.view === 'bus' || S.view === 'charter') {
-    const title = S.view === 'bus' ? '工作日通勤班车' : '深港跨境包车';
+    const title = S.view === 'bus' ? '工作日通勤班车' : '预约咨询';
     const sub = S.step > 0 ? '确认意向' : '填写预约';
     top.style.setProperty('--tint', S.step > 0 ? 0.4 : 0);
     top.innerHTML = `
@@ -1545,7 +1544,7 @@ function renderTop() {
 function renderTabs() {
   const items = [
     { id: 'home', label: '首页', ico: '<path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>' },
-    { id: 'price', label: '价目', ico: '<path d="M20.5 13.4 13.4 20.5a2 2 0 0 1-2.8 0L3.5 13.4a2 2 0 0 1-.6-1.4V5a1.5 1.5 0 0 1 1.5-1.5h7a2 2 0 0 1 1.4.6l7.7 7.7a2 2 0 0 1 0 2.6Z"/><circle cx="7.6" cy="7.6" r="1.3"/>' },
+    { id: 'price', label: '攻略', ico: '<path d="M20.5 13.4 13.4 20.5a2 2 0 0 1-2.8 0L3.5 13.4a2 2 0 0 1-.6-1.4V5a1.5 1.5 0 0 1 1.5-1.5h7a2 2 0 0 1 1.4.6l7.7 7.7a2 2 0 0 1 0 2.6Z"/><circle cx="7.6" cy="7.6" r="1.3"/>' },
     { id: 'me', label: '我的', ico: '<path d="M3 9.2V6.6A1.6 1.6 0 0 1 4.6 5h14.8A1.6 1.6 0 0 1 21 6.6v2.6a2.8 2.8 0 0 0 0 5.6v2.6a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 17.4v-2.6a2.8 2.8 0 0 0 0-5.6Z"/><path d="M9 9.8h6"/>' }
   ];
   const orderN = loadOrders().length;
@@ -1588,14 +1587,13 @@ function viewHome() {
   return `
   <div class="view home">
     <section class="hero">
-      <div class="hero-kicker">方行深港 · FONGGO</div>
       <h1>你的下一程，也是我的下一程。</h1>
       <p class="hero-lead">专业、耐心、陪伴您的每段路</p>
     </section>
 
     <section class="peers" aria-label="预约入口">
       <div class="peer navy">
-        <span class="peer-kicker">通勤班车</span>
+        <span class="peer-kicker">深港牛马通勤</span>
         <span class="peer-title">福田 ↔ 香港 IFC</span>
         <span class="peer-sub">07:45 福田站12出口到IFC<br>18:30 IFC—您温馨的家</span>
         <div class="peer-end">
@@ -1607,14 +1605,14 @@ function viewHome() {
         </div>
       </div>
       <div class="peer gold">
-        <span class="peer-kicker">包车 / 接送</span>
+        <span class="peer-kicker">点对点</span>
         <span class="peer-title">深港点对点</span>
-        <span class="peer-sub">点对点服务</span>
+        <span class="peer-sub">点对点咨询</span>
         <div class="peer-end">
           <span class="peer-foot"><b>¥498</b><em>起</em></span>
           <div class="peer-acts">
-            <button data-act="now-open">立即用车</button>
-            <button data-act="go" data-val="charter">预约用车</button>
+            <button data-act="now-open">立即咨询</button>
+            <button data-act="go" data-val="charter">预约咨询</button>
           </div>
         </div>
       </div>
@@ -2071,6 +2069,7 @@ function viewLogin() {
 function viewPrice() {
   return `
   <div class="view">
+    <div class="step-head"><h2>攻略</h2></div>
     <div class="block">
       <div class="block-head"><h2>通勤班车</h2><span class="pill brand">周一至周五</span></div>
       <div class="rows">
@@ -2152,7 +2151,7 @@ function viewNow() {
   const time = S.now.time || hkNextHalfHour();
   return `<div class="view">
     <div class="step-head">
-      <h2>立即用车</h2>
+      <h2>立即咨询</h2>
       <p>登记用车意向。工作人员确认车辆和时间后再安排。余位与车辆以确认结果为准。</p>
     </div>
     <div class="field"><span>出发地</span>${nowPlaceField('from')}</div>
@@ -2334,7 +2333,7 @@ function viewMe() {
       <div class="muted">改期、取消、加停靠点，请提前联系客服确认车辆与费用。班车的候补规则不在这里适用。</div>
       <div class="seg" style="margin-top:12px">
         <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">联系客服</a>
-        <button data-act="wecom-add">添加企微客服</button>
+        <button data-act="copy-wecom-id">点击复制微信号</button>
       </div>
     </div>
 
@@ -2991,6 +2990,15 @@ document.addEventListener('click', (e) => {
   if (act === 'toggle-trips') { S.showTrips = !S.showTrips; render(); return; }
   if (act === 'clear-orders') { clearOrders(); render(); return toast('已清除本机记录'); }
   if (act === 'copy-wx') return copy(CONFIG.contact.wechat);
+  if (act === 'copy-wecom-id') {
+    const wxid = String((CONFIG.wecom && CONFIG.wecom.wxid) || '').trim();
+    if (!wxid) {
+      toast('暂无可复制的微信号');
+      return;
+    }
+    copy(wxid);
+    return;
+  }
   if (act === 'copy-order') return copy(val);
   if (act === 'call') { location.href = 'tel:' + CONFIG.contact.phone; return; }
   if (act === 'now-open') {
