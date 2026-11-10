@@ -829,6 +829,140 @@
     .peers { grid-template-columns: 1fr; }
     .peer { min-height: 0; }
   }
+
+  /* 首页节奏：服务条 → 对等大卡 → 常驻咨询。只作用于首页。 */
+  .view.home { gap: 10px; padding: 8px 12px 18px; }
+  .home-hero { padding: 4px 2px 0; }
+  .home-hero h1 {
+    color: var(--brand); font-size: 26px; font-weight: 700; line-height: 1.28;
+    letter-spacing: -.03em; margin: 0;
+  }
+  .home-hero .hero-lead { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+  .home-service {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: 0 10px 28px -22px rgba(26,44,63,.55); overflow: hidden;
+  }
+  .home-service-row {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    padding: 11px 12px; border: 0; background: transparent; cursor: pointer; text-align: left;
+  }
+  .home-service-row:active { background: rgba(26,44,63,.04); }
+  .home-service-mark {
+    width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto;
+    display: grid; place-items: center; background: var(--brand); color: #f4e2bd;
+  }
+  .home-service-mark svg { width: 16px; height: 16px; display: block; }
+  .home-service-copy { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+  .home-service-copy b { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+  .home-service-copy small { margin-top: 2px; font-size: 12px; color: var(--muted); }
+  .home-service-go { color: var(--gold); font-size: 22px; line-height: 1; font-weight: 500; }
+
+  .home-trust {
+    display: flex; align-items: stretch; border-top: 1px solid var(--line-2);
+    padding: 0; margin: 0;
+  }
+  .home-trust span {
+    flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 4px;
+    min-height: 36px; padding: 7px 2px; font-size: 11.5px; color: var(--brand);
+    letter-spacing: .01em; white-space: nowrap;
+  }
+  .home-trust span + span { border-left: 1px solid var(--line-2); }
+  .home-trust svg { width: 14px; height: 14px; color: var(--gold); flex: 0 0 auto; }
+
+  .home-peers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: stretch; }
+  .home-peer {
+    position: relative; display: flex; flex-direction: column; align-items: stretch; text-align: left;
+    min-height: 232px; padding: 14px 12px 0; border: 0; border-radius: 18px; cursor: pointer;
+    overflow: hidden; transition: transform .12s ease;
+  }
+  .home-peer:active { transform: scale(.985); }
+  .home-peer-navy {
+    background:
+      radial-gradient(90px 70px at 100% 0%, rgba(200,168,110,.32), transparent 72%),
+      linear-gradient(168deg, #24384d 0%, #152433 100%);
+    color: #f6f2e9;
+    box-shadow: inset 0 2px 0 #c4a36a, 0 18px 32px -22px rgba(18,30,44,.85);
+  }
+  .home-peer-gold {
+    background:
+      radial-gradient(90px 70px at 100% 0%, rgba(255,255,255,.7), transparent 70%),
+      linear-gradient(168deg, #fbf6ec 0%, #e6d2aa 100%);
+    color: #3a2b10;
+    box-shadow: inset 0 2px 0 #1a2c3f, 0 18px 32px -22px rgba(133,97,40,.6);
+  }
+  .home-peer-title {
+    min-height: 2.5em; display: flex; align-items: flex-end;
+    font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.25;
+  }
+  .home-peer-sub { margin-top: 8px; font-size: 12.5px; line-height: 1.55; min-height: 3.1em; opacity: .88; }
+  .home-peer-price { margin-top: auto; padding: 10px 0 0; font-variant-numeric: tabular-nums; }
+  .home-peer-price b { font-size: 20px; font-weight: 700; letter-spacing: -.03em; }
+  .home-peer-price em { font-style: normal; font-size: 11px; margin-left: 2px; opacity: .68; }
+  .home-peer-cta {
+    margin: 10px -12px 0; height: 46px; padding: 0 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 14px; font-weight: 700; letter-spacing: .02em;
+  }
+  .home-peer-cta i {
+    width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+    font-style: normal; font-size: 13px; line-height: 1;
+  }
+  .home-peer-navy .home-peer-cta { background: #f4efe4; color: #1a2c3f; }
+  .home-peer-navy .home-peer-cta i { background: rgba(26,44,63,.08); }
+  .home-peer-gold .home-peer-cta { background: #1a2c3f; color: #f6f2e9; }
+  .home-peer-gold .home-peer-cta i { background: rgba(246,242,233,.16); }
+  .home-peer:active .home-peer-cta { filter: brightness(.96); }
+
+  .home-fare { margin: 0; padding: 0 2px; font-size: 11px; line-height: 1.65; color: var(--muted); }
+  .home-fare b {
+    display: block; margin-bottom: 2px; font-size: 11px; font-weight: 650;
+    letter-spacing: .08em; color: var(--gold);
+  }
+  .home-quiet {
+    align-self: flex-start; border: 0; background: none; padding: 0 2px; cursor: pointer;
+    color: var(--brand-2); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .home-quiet.on { color: var(--brand); font-weight: 650; }
+
+  .home-dock {
+    flex: 0 0 auto; z-index: 40; padding: 8px 12px 6px;
+    background: rgba(241,238,232,.96);
+  }
+  .home-dock[hidden] { display: none !important; }
+  .home-dock-btn {
+    width: 100%; height: 52px; border: 0; border-radius: 14px; cursor: pointer;
+    background: #1a2c3f; color: #f6f2e9;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 14px 0 18px;
+    font-size: 16px; font-weight: 700; letter-spacing: .06em;
+    box-shadow: 0 12px 26px -16px rgba(18,30,44,.9);
+    transition: transform .12s ease;
+  }
+  .home-dock-btn:active { transform: scale(.985); }
+  .home-dock-arrow {
+    width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(244,226,189,.14); border: 1px solid rgba(244,226,189,.38);
+    color: #f4e2bd; font-size: 16px; line-height: 1;
+  }
+  body.has-home-dock .toast { bottom: calc(150px + env(safe-area-inset-bottom)); }
+
+  .tabs { background: rgba(253,251,247,.97); }
+  .tabs button { font-size: 11.5px; font-weight: 500; padding: 6px 0 7px; gap: 2px; }
+  .tabs button.on { color: #1a2c3f; font-weight: 700; box-shadow: none; }
+  .tabs button.on .ico { stroke-width: 2.15; }
+  .tabs button.on::after {
+    content: ""; width: 16px; height: 2px; border-radius: 2px; background: #c4a36a;
+  }
+
+  @media (max-width: 340px) {
+    .home-peers { grid-template-columns: 1fr; }
+    .home-peer { min-height: 0; }
+    .home-peer-title, .home-peer-sub { min-height: 0; }
+    .home-trust span { font-size: 10.5px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home-peer, .home-dock-btn { transition: none; }
+  }
 </style>
 </head>
 <body>
@@ -1564,6 +1698,23 @@ function renderTop() {
     </a>`;
 }
 
+function renderHomeDock() {
+  let dock = document.getElementById('homeDock');
+  if (!dock) {
+    dock = document.createElement('div');
+    dock.id = 'homeDock';
+    dock.className = 'home-dock';
+    const tabs = document.getElementById('tabs');
+    tabs.parentNode.insertBefore(dock, tabs);
+  }
+  const show = S.view === 'home';
+  dock.hidden = !show;
+  document.body.classList.toggle('has-home-dock', show);
+  dock.innerHTML = show
+    ? '<button type="button" class="home-dock-btn" data-act="wecom-add"><span>添加企业微信</span><span class="home-dock-arrow" aria-hidden="true">→</span></button>'
+    : '';
+}
+
 function renderTabs() {
   const items = [
     { id: 'home', label: '首页', ico: '<path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>' },
@@ -1609,43 +1760,45 @@ function viewHome() {
   const nextLeft = next ? seatsLeft(availability(nextKey, '去程')) : 0;
   return `
   <div class="view home">
-    <section class="hero">
-      <h1>你的下一程，也是我的下一程。</h1>
-      <p class="hero-lead">专业、耐心、陪伴您的每段路</p>
-    </section>
+    <header class="home-hero">
+      <h1>你的下一程，<br>也是我的下一程。</h1>
+      <p class="hero-lead">专业、耐心、陪伴您的每段路。</p>
+    </header>
 
-    <div class="trust" aria-label="服务说明">
-      <span>报价透明</span>
-      <span>人工确认</span>
-      <span>保护隐私</span>
-    </div>
-
-    <section class="peers" aria-label="预约入口">
-      <div class="peer navy">
-        <span class="peer-kicker">深港牛马通勤</span>
-        <span class="peer-title">福田 ↔ 香港 IFC</span>
-        <span class="peer-sub">07:45 福田站12出口到IFC<br>18:30 IFC—您温馨的家</span>
-        <div class="peer-end">
-          <span class="peer-foot"><b>¥108</b><em>起</em></span>
-          <div class="peer-acts">
-            <button data-act="go" data-val="bus">预约报名</button>
-            <button class="${S.showTrips ? 'on' : ''}" data-act="toggle-trips">空余位置</button>
-          </div>
-        </div>
-      </div>
-      <div class="peer gold">
-        <span class="peer-kicker">点对点</span>
-        <span class="peer-title">深港点对点</span>
-        <span class="peer-sub">点对点咨询</span>
-        <div class="peer-end">
-          <span class="peer-foot"><b>¥498</b><em>起</em></span>
-          <div class="peer-acts">
-            <button data-act="now-open">立即咨询</button>
-            <button data-act="go" data-val="charter">预约咨询</button>
-          </div>
-        </div>
+    <section class="home-service" aria-label="客服与说明">
+      <button class="home-service-row" type="button" data-act="wecom-add">
+        <span class="home-service-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4.5 12.5v2a2 2 0 0 0 2 2H8v-5.8"/><path d="M19.5 12.5v2a2 2 0 0 1-2 2H16v-5.8"/><path d="M4.5 12a7.5 7.5 0 0 1 15 0"/><path d="M12 16.5V19"/></svg></span>
+        <span class="home-service-copy"><b>联系客服</b><small>添加企业微信，人工确认</small></span>
+        <span class="home-service-go" aria-hidden="true">›</span>
+      </button>
+      <div class="home-trust" aria-label="服务说明">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 6.5 12 12l5-5.5"/><path d="M12 12v6.5"/><path d="M8.2 13.2h7.6M8.2 16h7.6"/></svg>报价透明</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="8" r="2.2"/><path d="M5.2 16.6c.5-2.2 2.2-3.3 4.3-3.3s3.8 1.1 4.3 3.3"/><path d="M15.4 10.2 17.2 12l2.8-3.2"/></svg>人工确认</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="7" y="10.5" width="10" height="8" rx="1.6"/><path d="M9 10.5V8.5a3 3 0 0 1 6 0v2"/></svg>保护隐私</span>
       </div>
     </section>
+
+    <section class="home-peers" aria-label="预约入口">
+      <button class="home-peer home-peer-navy" type="button" data-act="go" data-val="bus">
+        <span class="home-peer-title">深港牛马通勤</span>
+        <span class="home-peer-sub">07:45 福田站 12 出口到 IFC<br>18:30 IFC—您温馨的家</span>
+        <span class="home-peer-price"><b>¥108</b><em>起</em></span>
+        <span class="home-peer-cta">预约咨询<i aria-hidden="true">→</i></span>
+      </button>
+      <button class="home-peer home-peer-gold" type="button" data-act="now-open">
+        <span class="home-peer-title">点对点</span>
+        <span class="home-peer-sub">点对点咨询<br>提供五个位置</span>
+        <span class="home-peer-price"><b>¥498</b><em>起</em></span>
+        <span class="home-peer-cta">立即咨询<i aria-hidden="true">→</i></span>
+      </button>
+    </section>
+
+    <p class="home-fare">
+      <b>参考报价 · 不是锁定总价</b>
+      机场/宝安/龙岗 ↔ 港岛 658、↔ 九龙 598；市区（福田、罗湖、南山、龙华等）↔ 港岛 598、↔ 九龙 498；反向同价；深圳 → 香港迪士尼 498。
+    </p>
+
+    <button class="home-quiet${S.showTrips ? ' on' : ''}" type="button" data-act="toggle-trips">${S.showTrips ? '收起参考余位' : '参考余位 · 演示'}</button>
     ${S.showTrips ? `<div class="block"><div class="block-head"><h2>近期班次（参考）</h2><span class="muted">${next ? '参考余 ' + nextLeft + ' 座 · 演示' : ''}</span></div>${tripRows(4)}<div class="muted" style="margin-top:8px">余位只是演示参考，不会锁座。以客服确认为准。</div></div>` : ''}
 
     ${wecomBlock(null, { compact: true })}
@@ -2729,6 +2882,7 @@ function render() {
   if (tabs) tabs.style.display = S.view === 'login' ? 'none' : '';
   renderTop();
   renderTabs();
+  renderHomeDock();
   if (S.view === 'bus') main.innerHTML = viewBus();
   else if (S.view === 'charter' || S.view === 'now') main.innerHTML = viewConsult();
   else if (S.view === 'login') main.innerHTML = viewLogin();
