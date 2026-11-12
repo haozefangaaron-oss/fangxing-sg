@@ -843,11 +843,10 @@
     background: var(--card); border: 1px solid var(--line); border-radius: 16px;
     box-shadow: 0 10px 28px -22px rgba(26,44,63,.55); overflow: hidden;
   }
-  .home-service-row {
-    width: 100%; display: flex; align-items: center; gap: 10px;
-    padding: 11px 12px; border: 0; background: transparent; cursor: pointer; text-align: left;
+  .home-service-quiet {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 12px 10px; text-align: left;
   }
-  .home-service-row:active { background: rgba(26,44,63,.04); }
   .home-service-mark {
     width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto;
     display: grid; place-items: center; background: var(--brand); color: #f4e2bd;
@@ -896,11 +895,12 @@
     font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.25;
   }
   .home-peer-sub { margin-top: 8px; font-size: 12.5px; line-height: 1.55; min-height: 3.1em; opacity: .88; }
-  .home-peer-price { margin-top: auto; padding: 10px 0 0; font-variant-numeric: tabular-nums; }
+  .home-peer-fill { flex: 1 1 auto; min-height: 8px; }
+  .home-peer-price { padding: 0 0 2px; font-variant-numeric: tabular-nums; }
   .home-peer-price b { font-size: 20px; font-weight: 700; letter-spacing: -.03em; }
   .home-peer-price em { font-style: normal; font-size: 11px; margin-left: 2px; opacity: .68; }
   .home-peer-cta {
-    margin: 10px -12px 0; height: 46px; padding: 0 12px;
+    margin: 12px -12px 0; height: 48px; padding: 0 12px;
     display: flex; align-items: center; justify-content: space-between;
     font-size: 14px; font-weight: 700; letter-spacing: .02em;
   }
@@ -962,6 +962,39 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .home-peer, .home-dock-btn { transition: none; }
+  }
+
+  /* 咨询表：跟首页同一套纸、字和圆角，间距落在 4px 网格 */
+  .view.form-page, .view.consult { gap: 16px; padding: 16px 16px 24px; }
+  .view.form-page .step-head h2, .view.consult .step-head h2 {
+    font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.3; color: var(--brand);
+  }
+  .view.form-page .step-head p, .view.consult .step-head p { margin-top: 8px; font-size: 13px; line-height: 1.6; }
+  .view.form-page .form-sec, .view.consult .form-sec { gap: 8px; }
+  .view.form-page .form-sec > h2, .view.consult .form-sec > h2 {
+    font-size: 16px; font-weight: 700; letter-spacing: -.02em; margin: 8px 0 0; color: var(--ink);
+  }
+  .view.consult .trust {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0;
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
+  }
+  .view.consult .trust span {
+    display: flex; align-items: center; justify-content: center; min-height: 40px;
+    border: 0; border-radius: 0; background: transparent; letter-spacing: 0; font-size: 12px; padding: 8px 4px;
+  }
+  .view.consult .trust span + span { border-left: 1px solid var(--line-2); }
+  .view.consult .seg.trip {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%;
+  }
+  .view.consult .seg.trip > button {
+    width: 100%; min-width: 0; height: 44px; margin: 0; padding: 0 8px;
+  }
+  .view.form-page .date-chip { min-width: 96px; border-radius: 12px; }
+  .view.form-page .date-chip .dd { white-space: nowrap; }
+  .view.form-page .field-row .time-field { flex: 1 1 auto; min-width: 0; height: 44px; }
+  .field { position: relative; }
+  .field input.date-native {
+    position: absolute; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; pointer-events: none;
   }
 </style>
 </head>
@@ -1344,6 +1377,11 @@ function hkToday() {
     return ymd(new Date());
   }
 }
+function cnDate(iso) {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
+  const parts = iso.split('-').map(Number);
+  return parts[0] + '年' + parts[1] + '月' + parts[2] + '日';
+}
 function hkNextHalfHour() {
   try {
     const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Hong_Kong', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
@@ -1610,7 +1648,9 @@ function wecomBlock(order, opts) {
     </div>
     <p class="wecom-cap">长按二维码识别，添加企业微信。</p>
     ${compact
-      ? `<button class="btn primary block" type="button" data-act="copy-wecom-id">点击复制微信号</button>`
+      ? (String((CONFIG.wecom && CONFIG.wecom.wxid) || '').trim()
+        ? `<button class="btn ghost block" type="button" data-act="copy-wecom-id">点击复制微信号</button>`
+        : '')
       : `<a class="btn primary block" href="tel:${CONFIG.contact.phone}">电话联系客服确认付款</a>
          <div style="text-align:center"><button class="link" data-act="copy-wx">复制客服号 ${esc(CONFIG.contact.phone)}</button></div>`}
   </section>`;
@@ -1670,7 +1710,7 @@ function renderTop() {
   }
   if (S.view === 'bus' || S.view === 'charter') {
     const title = S.view === 'bus' ? '工作日通勤班车' : '预约咨询';
-    const sub = S.view === 'charter' ? '预约登记 · 人工确认' : (S.step > 0 ? '确认意向' : '填写预约');
+    const sub = S.view === 'charter' ? '预约登记 · 人工确认' : (S.step > 0 ? '确认意向' : '预约登记');
     top.style.setProperty('--tint', S.step > 0 ? 0.4 : 0);
     top.innerHTML = `
       <div class="flow-top">
@@ -1766,11 +1806,10 @@ function viewHome() {
     </header>
 
     <section class="home-service" aria-label="客服与说明">
-      <button class="home-service-row" type="button" data-act="wecom-add">
+      <div class="home-service-quiet">
         <span class="home-service-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4.5 12.5v2a2 2 0 0 0 2 2H8v-5.8"/><path d="M19.5 12.5v2a2 2 0 0 1-2 2H16v-5.8"/><path d="M4.5 12a7.5 7.5 0 0 1 15 0"/><path d="M12 16.5V19"/></svg></span>
         <span class="home-service-copy"><b>联系客服</b><small>添加企业微信，人工确认</small></span>
-        <span class="home-service-go" aria-hidden="true">›</span>
-      </button>
+      </div>
       <div class="home-trust" aria-label="服务说明">
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 6.5 12 12l5-5.5"/><path d="M12 12v6.5"/><path d="M8.2 13.2h7.6M8.2 16h7.6"/></svg>报价透明</span>
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="8" r="2.2"/><path d="M5.2 16.6c.5-2.2 2.2-3.3 4.3-3.3s3.8 1.1 4.3 3.3"/><path d="M15.4 10.2 17.2 12l2.8-3.2"/></svg>人工确认</span>
@@ -1782,14 +1821,15 @@ function viewHome() {
       <button class="home-peer home-peer-navy" type="button" data-act="go" data-val="bus">
         <span class="home-peer-title">深港牛马通勤</span>
         <span class="home-peer-sub">07:45 福田站 12 出口到 IFC<br>18:30 IFC—您温馨的家</span>
-        <span class="home-peer-price"><b>¥108</b><em>起</em></span>
+        <span class="home-peer-fill"></span>
         <span class="home-peer-cta">预约咨询<i aria-hidden="true">→</i></span>
       </button>
       <button class="home-peer home-peer-gold" type="button" data-act="now-open">
         <span class="home-peer-title">点对点</span>
-        <span class="home-peer-sub">点对点咨询<br>提供五个位置</span>
+        <span class="home-peer-sub">预约登记，客服确认<br>提供五个位置</span>
+        <span class="home-peer-fill"></span>
         <span class="home-peer-price"><b>¥498</b><em>起</em></span>
-        <span class="home-peer-cta">立即咨询<i aria-hidden="true">→</i></span>
+        <span class="home-peer-cta">预约咨询<i aria-hidden="true">→</i></span>
       </button>
     </section>
 
@@ -1844,7 +1884,7 @@ function viewBus() {
   const d = S.draft;
   const p = lastPax();
   return `<div class="view form-page">
-    <div class="step-head"><h2>填写预约</h2><p>方向、日期、座位和乘车人一次填完。余位仅供参考，以客服确认为准。</p></div>
+    <div class="step-head"><h2>登记班车</h2><p>方向、日期、座位和乘车人一次填完。余位仅供参考，以客服确认为准。</p></div>
     <section class="form-sec">
       <h2>选择方向</h2>
       <p>去程：福田 → 香港IFC；返程：IFC → 深圳</p>
@@ -1914,10 +1954,10 @@ function busBody(key) {
           ? '<span class="left" style="color:#b45309">已截止</span>'
           : `<span class="left" style="color:#177a52">参考余 ${left} · 演示</span>`;
       return `<button class="date-chip ${d.date === key ? 'on' : ''}" data-act="bus-date" data-val="${key}" ${hol || closed ? 'disabled' : ''}>
-        <span class="wd">${hol ? '公众假期' : WD[dt.getDay()]}</span><span class="dd">${dt.getMonth() + 1}/${dt.getDate()}</span>${badge}
+        <span class="wd">${hol ? '公众假期' : WD[dt.getDay()]}</span><span class="dd">${dt.getMonth() + 1}月${dt.getDate()}日</span>${badge}
       </button>`;
     }).join('');
-    const holLine = nextHol ? `<div class="hol-note">${nextHol} ${HOLIDAYS[nextHol]} · 香港公众假期，班车不开。</div>` : '';
+    const holLine = nextHol ? `<div class="hol-note">${cnDate(nextHol)} ${HOLIDAYS[nextHol]} · 香港公众假期，班车不开。</div>` : '';
     return `
       <div class="block">
         <div class="block-head"><h2>最近的班次</h2><span class="muted">参考余位</span></div>
@@ -1935,7 +1975,8 @@ function busBody(key) {
         <div class="field" style="margin-top:10px">
           <span>其他日期（任意工作日）</span>
           <div class="field-row">
-            <input type="date" id="otherDate" min="${ymd(new Date())}" value="${esc(d.otherDate || '')}">
+            <button type="button" class="time-field" data-act="open-date" data-val="bus">${d.otherDate ? cnDate(d.otherDate) : '选择日期'}</button>
+            <input type="date" id="otherDate" class="date-native" min="${ymd(new Date())}" value="${esc(d.otherDate || '')}">
             <button class="btn ghost small nowrap" data-act="bus-date-other">查看余位</button>
           </div>
         </div>
@@ -1986,7 +2027,7 @@ function busBody(key) {
   if (key === 'confirm') {
     const seat = SEAT_BY_ID[d.seat];
     const date = parseISO(d.date);
-    const rows = [['业务', '工作日通勤班车 · ' + d.direction], ['日期', `${d.date}（${WD[date.getDay()]}）`]];
+    const rows = [['业务', '工作日通勤班车 · ' + d.direction], ['日期', `${cnDate(d.date)}（${WD[date.getDay()]}）`]];
     if (d.direction === '去程') rows.push(['集合', '福田站12号出口 · 7:45 集合 · 7:50 发车']);
     else {
       rows.push(['集合', 'IFC二期落客区 · 18:30 集合发车']);
@@ -2336,7 +2377,7 @@ const AIRPORTS = [
 ];
 function blankConsult() {
   return {
-    trip: '单程', date: hkToday(), time: hkNextHalfHour(), landTime: '',
+    trip: '单程', date: hkToday(), time: '', landTime: '',
     fromPlace: null, toPlace: null, flight: '',
     adults: 1, children: 0, bags: 0, childseat: false,
     name: '', phone: '', wx: '', remark: ''
@@ -2405,7 +2446,10 @@ function viewConsult() {
     </div>
     <section class="form-sec">
       <h2>时间</h2>
-      <label class="field"><span>日期</span><input type="date" id="consultDate" min="${hkToday()}" value="${esc(c.date || '')}"></label>
+      <label class="field"><span>日期</span>
+        <button type="button" class="time-field" data-act="open-date" data-val="consult">${c.date ? cnDate(c.date) : '选择日期'}</button>
+        <input type="date" id="consultDate" class="date-native" min="${hkToday()}" value="${esc(c.date || '')}">
+      </label>
       <div class="field"><span>时间</span>
         <button type="button" class="time-field" data-act="open-time" data-val="consult">${esc(c.time || '选择时间')}</button>
       </div>
@@ -3408,9 +3452,19 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (act === 'consult-submit') return submitConsult();
+  if (act === 'open-date') {
+    const input = document.getElementById(val === 'bus' ? 'otherDate' : 'consultDate');
+    if (!input) return;
+    if (typeof input.showPicker === 'function') {
+      try { input.showPicker(); return; } catch (err) {}
+    }
+    input.focus();
+    input.click();
+    return;
+  }
   if (act === 'open-time') {
     S.timeTarget = val || 'charter';
-    if (val === 'consult') S.timeDraft = (S.consult && S.consult.time) || hkNextHalfHour();
+    if (val === 'consult') S.timeDraft = (S.consult && S.consult.time) || '08:00';
     else if (val === 'consult-land') S.timeDraft = (S.consult && S.consult.landTime) || '08:00';
     else if (val === 'now') S.timeDraft = (S.now && S.now.time) || hkNextHalfHour();
     else S.timeDraft = S.draft.time || '08:00';
@@ -3689,6 +3743,14 @@ document.addEventListener('click', (e) => {
 let searchTimer = null;
 let searchSeq = 0;
 document.addEventListener('change', (e) => {
+  if (e.target && (e.target.id === 'consultDate' || e.target.id === 'otherDate')) {
+    const iso = e.target.value;
+    const face = e.target.parentElement && e.target.parentElement.querySelector('[data-act="open-date"]');
+    if (face) face.textContent = cnDate(iso) || '选择日期';
+    if (e.target.id === 'consultDate' && S.consult) S.consult.date = iso;
+    if (e.target.id === 'otherDate') S.draft.otherDate = iso;
+    return;
+  }
   if (e.target && e.target.id === 'consentBox') {
     S.consent = !!e.target.checked;
     document.querySelectorAll('[data-act="bus-submit"],[data-act="charter-submit"],[data-act="now-submit"],[data-act="consult-submit"]').forEach((btn) => {
