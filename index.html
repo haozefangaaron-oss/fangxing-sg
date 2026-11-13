@@ -511,15 +511,23 @@
   .tl-list li b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; min-width: 40px; }
 
   /* 空态引导 */
-  .empty { text-align: center; padding: 26px 12px 22px; }
+  .empty { text-align: center; padding: 10px 4px 2px; }
   .empty-ico {
-    width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 16px; display: grid; place-items: center;
-    background: var(--brand-soft); color: var(--brand); font-size: 24px; line-height: 1;
+    width: 32px; height: 32px; margin: 0 auto 6px; border-radius: 10px; display: grid; place-items: center;
+    background: var(--brand-soft); color: var(--brand); font-size: 16px; line-height: 1;
   }
-  .empty h3 { font-size: 15.5px; margin: 0 0 5px; }
-  .empty p { color: var(--muted); font-size: 12.5px; line-height: 1.7; }
-  .empty-act { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 9px; margin-top: 16px; }
-  .empty-act .btn { height: 42px; font-size: 13.5px; }
+  .empty h3 { font-size: 14px; margin: 0 0 2px; }
+  .empty p { color: var(--muted); font-size: 12px; line-height: 1.45; }
+  .empty-act { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; margin-top: 10px; }
+  .empty-act .btn { height: 34px; font-size: 13px; }
+  .view.me { gap: 10px; padding-top: 10px; }
+  .view.me .block { padding: 12px; }
+  .view.me .block-head { margin-bottom: 6px; }
+  .view.me .muted { font-size: 12px; line-height: 1.45; }
+  .view.me .seg { margin-top: 8px; }
+  .view.me .seg button, .view.me .seg a.btn { height: 36px; font-size: 13px; }
+  .view.me .btn.block { height: 36px; }
+  .view.me .row { padding: 8px 12px; }
   .stepper .ctrl button[disabled] { opacity: .32; cursor: not-allowed; }
   .opt, .seat-card, .date-chip, .trip { transition: transform .12s ease, border-color .16s ease; }
   .opt:active, .seat-card:active, .date-chip:active, .trip:active, .result:active, .row:active { transform: scale(.985); }
@@ -651,9 +659,9 @@
   /* 班车 / 包车同等入口 */
   .hero h1 { position: relative; z-index: 1; color: var(--hero-ink); font-size: 22px; font-weight: 650; margin: 12px 0 8px; letter-spacing: -.02em; line-height: 1.35; }
   .hero .hero-lead { position: relative; z-index: 1; margin: 0; color: rgba(246,242,233,.74); font-size: 12.5px; line-height: 1.6; }
-  .peers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+  .peers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch; }
   .peer {
-    min-height: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+    min-height: 0; height: 100%; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
     padding: 14px 13px 12px; border-radius: 20px; cursor: default; border: 1px solid transparent;
   }
   .peer.navy {
@@ -2311,7 +2319,7 @@ function viewMe() {
         </div>
       </div>`;
   return `
-  <div class="view">
+  <div class="view me">
     <div class="block">
       <div class="block-head"><h2>我的预约</h2><span class="muted">${orders.length} 条</span></div>
       <div class="muted">先记在本机。显示「已提交」才表示送到了客服端。余位与车辆以客服确认为准。点「履约进度」可以看时间轴。</div>
@@ -2322,7 +2330,7 @@ function viewMe() {
     <div class="block">
       <div class="block-head"><h2>改期与取消</h2></div>
       <div class="muted">改期、取消、加停靠点，请提前联系客服确认车辆与费用。班车的候补规则不在这里适用。</div>
-      <div class="seg" style="margin-top:12px">
+      <div class="seg">
         <a class="btn ghost" href="tel:${CONFIG.contact.phone}" style="text-decoration:none">联系客服</a>
         <button data-act="copy-wecom-id">点击复制微信号</button>
       </div>
@@ -2333,8 +2341,8 @@ function viewMe() {
       <div class="rows">
         <div class="row"><span>客服电话</span><b><a href="tel:${CONFIG.contact.phone}" style="color:inherit;text-decoration:none">${CONFIG.contact.phone}</a></b></div>
       </div>
-      <button class="btn ghost block" style="margin-top:12px" data-act="call">一键拨号</button>
-      <div class="muted" style="margin-top:10px">${CONFIG.contact.note}</div>
+      <button class="btn ghost block" style="margin-top:8px" data-act="call">一键拨号</button>
+      <div class="muted" style="margin-top:6px">${CONFIG.contact.note}</div>
     </div>
 
     <div class="reminder">${REMINDER}</div>
