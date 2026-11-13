@@ -285,6 +285,11 @@
   .fares span { font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; }
   .fares span b { font-weight: 400; color: var(--muted); margin-right: 5px; font-size: 12px; }
   .fares span i { font-style: normal; font-size: 11px; color: var(--muted); }
+  .market-ref { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line-2); }
+  .market-ref-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .market-ref-top span { font-size: 13px; color: var(--ink-2); }
+  .market-ref-top b { font-size: 22px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .market-ref p { margin: 6px 0 0; font-size: 12px; line-height: 1.55; color: var(--muted); }
   .quote-list { margin-top: 14px; display: flex; flex-direction: column; gap: 5px; }
   .quote-list div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 11.5px; line-height: 1.45; color: var(--muted); }
   .quote-list b { flex: 0 0 auto; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
@@ -646,9 +651,9 @@
   /* 班车 / 包车同等入口 */
   .hero h1 { position: relative; z-index: 1; color: var(--hero-ink); font-size: 22px; font-weight: 650; margin: 12px 0 8px; letter-spacing: -.02em; line-height: 1.35; }
   .hero .hero-lead { position: relative; z-index: 1; margin: 0; color: rgba(246,242,233,.74); font-size: 12.5px; line-height: 1.6; }
-  .peers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .peers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
   .peer {
-    min-height: 198px; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+    min-height: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
     padding: 14px 13px 12px; border-radius: 20px; cursor: default; border: 1px solid transparent;
   }
   .peer.navy {
@@ -849,9 +854,9 @@ const CONFIG = {
 globalThis.__FONGGO_CONFIG__ = CONFIG; // 便于调试 / 自动化测试
 
 const SEATS = [
-  { id: '副驾', name: '副驾驶位', cap: 1, price: 118, sub: '视野最好，单人座' },
-  { id: '二排', name: '埃尔法第二排', cap: 2, price: 128, sub: '独立座椅，最舒适' },
-  { id: '三排', name: '埃尔法第三排', cap: 2, price: 108, sub: '后排，性价比高' }
+  { id: '副驾', name: '副驾驶位', cap: 1, sub: '视野最好，单人座' },
+  { id: '二排', name: '埃尔法第二排', cap: 2, sub: '独立座椅，最舒适' },
+  { id: '三排', name: '埃尔法第三排', cap: 2, sub: '后排，性价比高' }
 ];
 const SEAT_BY_ID = SEATS.reduce((m, s) => (m[s.id] = s, m), {});
 const PAY_TEXT = '微信、微信香港、支付宝、支付宝香港';
@@ -1561,7 +1566,6 @@ function tripRows(n) {
     const key = ymd(d);
     const av = availability(key, '去程');
     const left = seatsLeft(av);
-    const price = fromPrice(av);
     const closed = !bookable(d);
     const badge = closed
       ? '<span class="pill off">已截止</span>'
@@ -1573,7 +1577,6 @@ function tripRows(n) {
           <div class="trip-meta">去程 · 福田站12号出口 7:45 集合</div>
         </div>
         <div class="trip-right">
-          ${price == null ? '' : `<div class="s-price">¥${price}<small>起</small></div>`}
           ${badge}
         </div>
       </button>`;
@@ -1597,7 +1600,6 @@ function viewHome() {
         <span class="peer-title">福田 ↔ 香港 IFC</span>
         <span class="peer-sub">07:45 福田站12出口到IFC<br>18:30 IFC—您温馨的家</span>
         <div class="peer-end">
-          <span class="peer-foot"><b>¥108</b><em>起</em></span>
           <div class="peer-acts">
             <button data-act="go" data-val="bus">预约报名</button>
             <button class="${S.showTrips ? 'on' : ''}" data-act="toggle-trips">空余位置</button>
@@ -1609,7 +1611,6 @@ function viewHome() {
         <span class="peer-title">深港点对点</span>
         <span class="peer-sub">点对点咨询</span>
         <div class="peer-end">
-          <span class="peer-foot"><b>¥498</b><em>起</em></span>
           <div class="peer-acts">
             <button data-act="now-open">立即咨询</button>
             <button data-act="go" data-val="charter">预约咨询</button>
@@ -1768,7 +1769,7 @@ function busBody(key) {
       const badge = `<span class="pill ok">参考余 ${left}/${s.cap}<i class="demo-tag">演示</i></span>`;
       return `<button class="seat-card ${d.seat === s.id ? 'on' : ''}" data-act="bus-seat" data-val="${s.id}">
         <div><div class="s-name">${s.name}</div><div class="s-sub">${s.sub}</div></div>
-        <div class="seat-right">${badge}<div class="s-price">¥${s.price}</div></div>
+        <div class="seat-right">${badge}</div>
       </button>`;
     }).join('');
     return `
@@ -1817,7 +1818,7 @@ function busBody(key) {
       <div class="summary">
         <div class="summary-head">班车意向单</div>
         <dl>${rows.map((r) => `<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>
-        <div class="total"><span>参考金额</span><b>¥${seat.price}</b></div>
+        <div class="total"><span>价格</span><b>待客服报价</b></div>
       </div>
       <div class="reminder">${REMINDER}</div>
       <div class="muted">提交意向不等于锁座。余位与车辆以客服确认结果为准。</div>
@@ -2038,18 +2039,14 @@ function pqResultHTML() {
   const a = S.pq.from, b = S.pq.to;
   const fromLabel = districtLabel(a);
   const toLabel = districtLabel(b);
-  if (a === b) return '<div class="muted" style="margin-top:10px">出发和目的地是同一个区，同区用车请咨询客服。</div>';
-  const price = zoneQuote(a, b);
-  if (price == null) {
-    return '<div class="muted" style="margin-top:10px">' + fromLabel + ' → ' + toLabel + ' 需人工核价。</div>' +
-      '<div class="seg" style="margin-top:12px"><a class="btn ghost" href="tel:' + CONFIG.contact.phone + '" style="text-decoration:none">电话问价</a><button data-act="wecom-add">添加企微问价</button></div>';
-  }
-  const big = price === 498 ? '¥498<span class="price-qi">起</span>' : ('¥' + price);
-  return '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:12px">' +
-    '<div class="muted">' + fromLabel + ' → ' + toLabel + '</div>' +
-    '<div style="font-size:26px;font-weight:700;letter-spacing:.3px">' + big + '</div></div>' +
-    '<div class="muted" style="font-size:11.5px;margin-top:4px">基础一口价；夜间、节假日、等候、隧道停车等另计，需人工确认。</div>' +
-    '<button class="btn gold block" style="margin-top:12px" data-act="pq-go">按这个价登记意向</button>';
+  const route = a === b
+    ? '<div class="muted" style="margin-top:10px">出发和目的地是同一个区，同区用车请咨询客服。</div>'
+    : '<div class="muted" style="margin-top:10px">' + fromLabel + ' → ' + toLabel + '</div>' +
+      '<button class="btn gold block" style="margin-top:12px" data-act="pq-go">登记咨询意向</button>';
+  return '<div class="market-ref">' +
+    '<div class="market-ref-top"><span>市场预计价格</span><b>¥498–658</b></div>' +
+    '<p>仅供参考，方便对照，避免踩雷。不是锁定报价，也不是下单价格。</p>' +
+    '</div>' + route;
 }
 function viewLogin() {
   return `<div class="view login">
@@ -2077,19 +2074,13 @@ function viewPrice() {
         <div class="row"><span>落客</span><b>IFC 二期</b></div>
         <div class="row"><span>返程</span><b>IFC 二期 18:30 → 皇岗口岸 / 家门口</b></div>
       </div>
-      <div class="fares">
-        <span><b>副驾</b>¥118</span>
-        <span><b>二排</b>¥128</span>
-        <span><b>三排</b>¥108</span>
-        <span><b>月票</b>¥2400<i>/月</i></span>
-      </div>
       <div class="muted" style="margin-top:10px;line-height:1.8">
         提供五个位置；按香港工作日安排。
       </div>
     </div>
 
     <div class="block">
-      <div class="block-head"><h2>包车自助报价</h2><span class="muted">选两个区域，立即出价</span></div>
+      <div class="block-head"><h2>包车自助报价</h2><span class="muted">选区域，登记意向</span></div>
       <div class="field-row">
         <label class="field" style="flex:1"><span>出发区域</span>
           <select id="pqFrom" class="sel">${districtOptions(S.pq.from)}</select>
@@ -2622,7 +2613,7 @@ function submitBus() {
   const seat = SEAT_BY_ID[d.seat];
   const order = {
     id: newOrderId('FX'), type: '通勤班车', direction: d.direction, date: d.date,
-    seat: seat.name, price: seat.price,
+    seat: seat.name, price: null,
     dropoff: d.dropoff || '',
     dropoffAddr: d.dropoff === '家门口' && d.homePlace ? (d.homePlace.name + (d.homePlace.addr ? ' ' + d.homePlace.addr : '')) : '',
     name: d.name, phone: d.phone, stage: 0, status: '已登记', sync: 'syncing', paidDeclared: false, personalWechat: '', createdAt: new Date().toISOString()
