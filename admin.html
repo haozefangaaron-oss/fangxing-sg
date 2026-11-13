@@ -275,7 +275,7 @@
           '<div class="order-sub">' + (o.type || '') + ' · ' + (p.price == null ? '待报价' : '¥' + p.price) + ' · ' + esc((o.created_at || '').replace('T', ' ').slice(0, 16)) + '</div>' +
           '<div class="order-actions">' +
           '<button class="btn small" data-act="paid" data-id="' + esc(o.id) + '">标记已付款</button>' +
-          '<button class="btn small" data-act="done" data-id="' + esc(o.id) + '">确认占位</button>' +
+          '<button class="btn small" data-act="done" data-id="' + esc(o.id) + '">确认安排</button>' +
           '<button class="btn small" data-act="cancel" data-id="' + esc(o.id) + '">取消</button>' +
           '</div></div>';
       }).join('') : '<div class="empty">没有符合条件的订单</div>') + '</div>';
@@ -344,7 +344,7 @@
       lines.push('');
       lines.push((d.getMonth() + 1) + '/' + d.getDate() + ' ' + WD[d.getDay()]);
       lines.push('去程 7:50 福田站12号出口 → IFC二期：' + (a > 0 ? '余 ' + a + ' 座' : '已满'));
-      lines.push('返程 18:40 IFC二期 → 皇岗/家门口：' + (b > 0 ? '余 ' + b + ' 座' : '已满'));
+      lines.push('返程 18:30 IFC二期 → 皇岗/家门口：' + (b > 0 ? '余 ' + b + ' 座' : '已满'));
     });
     lines.push('');
     lines.push('预约 👉 ' + BOOK_URL);
